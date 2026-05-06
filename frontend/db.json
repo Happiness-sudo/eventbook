@@ -1,0 +1,65 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Test User",
+      "email": "user@test.com",
+      "role": "user"
+    }
+  ],
+  "vendors": [
+    {
+      "id": 1,
+      "name": "Sound Masters Kenya",
+      "category": "DJ",
+      "location": "Nairobi",
+      "price": 25000,
+      "rating": 4.7,
+      "image": "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400",
+      "description": "Professional DJ services for weddings, corporate events, and parties."
+    },
+    {
+      "id": 2,
+      "name": "Bloom & Beauty Florists",
+      "category": "Florist",
+      "location": "Mombasa",
+      "price": 18000,
+      "rating": 4.9,
+      "image": "https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=400",
+      "description": "Stunning floral arrangements for every occasion."
+    },
+    {
+      "id": 3,
+      "name": "Capture Moments Photography",
+      "category": "Photographer",
+      "location": "Nairobi",
+      "price": 35000,
+      "rating": 4.8,
+      "image": "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=400",
+      "description": "Award-winning event photography with same-day editing."
+    },
+    {
+      "id": 4,
+      "name": "Royal Caterers Ltd",
+      "category": "Catering",
+      "location": "Kisumu",
+      "price": 45000,
+      "rating": 4.5,
+      "image": "https://images.unsplash.com/photo-1555244162-803834f70033?w=400",
+      "description": "Authentic Kenyan and international cuisine for events of all sizes."
+    },
+    {
+      "id": 5,
+      "name": "Elite Event Planners",
+      "category": "Planner",
+      "location": "Nairobi",
+      "price": 60000,
+      "rating": 4.6,
+      "image": "https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=400",
+      "description": "Full-service event planning from concept to execution."
+    }
+  ],
+  "events": [],
+  "bookings": [],
+  "services": []
+}
