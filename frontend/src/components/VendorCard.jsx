@@ -1,11 +1,6 @@
-// A card that displays a single vendor's basic info on the vendor list page.
-
 function VendorCard({ vendor, onView }) {
-  // Defensive default — if no vendor is passed, render nothing.
-  // Prevents crashes during loading states.
   if (!vendor) return null;
 
-  // Pull out the fields we need with safe fallbacks
   const {
     name = "Unnamed Vendor",
     category = "General",
@@ -15,63 +10,88 @@ function VendorCard({ vendor, onView }) {
     image,
   } = vendor;
 
-  const cardStyle = {
-    border: "1px solid #e5e4e7",
-    borderRadius: "10px",
-    padding: "16px",
-    background: "#fff",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
-    width: "260px",
-    fontFamily: "system-ui, sans-serif",
-    cursor: "pointer",
-    transition: "transform 0.2s, box-shadow 0.2s",
-  };
-
-  const imageStyle = {
-    width: "100%",
-    height: "150px",
-    objectFit: "cover",
-    borderRadius: "8px",
-    background: "#f4f3ec",
-  };
-
-  const nameStyle = {
-    fontSize: "18px",
-    fontWeight: 600,
-    margin: "12px 0 4px",
-    color: "#08060d",
-  };
-
-  const metaStyle = {
-    fontSize: "14px",
-    color: "#6b6375",
-    margin: "2px 0",
-  };
-
-  const priceStyle = {
-    fontSize: "16px",
-    fontWeight: 600,
-    color: "#aa3bff",
-    marginTop: "8px",
-  };
-
-  // Format price with commas (e.g. 15000 -> 15,000)
   const formattedPrice = Number(price).toLocaleString();
 
   return (
-    <div style={cardStyle} onClick={() => onView && onView(vendor)}>
+    <div style={S.card} onClick={() => onView && onView(vendor)}>
       <img
         src={image || "https://via.placeholder.com/260x150?text=No+Image"}
         alt={name}
-        style={imageStyle}
+        style={S.image}
       />
-      <h3 style={nameStyle}>{name}</h3>
-      <p style={metaStyle}> {location}</p>
-      <p style={metaStyle}> {category}</p>
-      <p style={metaStyle}> {rating} / 5</p>
-      <p style={priceStyle}>KES {formattedPrice}</p>
+      <div style={S.body}>
+        <span style={S.category}>{category}</span>
+        <h3 style={S.name}>{name}</h3>
+        <p style={S.meta}>{location}</p>
+        <div style={S.bottom}>
+          <span style={S.rating}>★ {rating}</span>
+          <span style={S.price}>KES {formattedPrice}</span>
+        </div>
+      </div>
     </div>
   );
 }
+
+const S = {
+  card: {
+    background: "var(--card-bg)",
+    border: "1px solid var(--border)",
+    borderRadius: "20px",
+    overflow: "hidden",
+    width: "260px",
+    cursor: "pointer",
+    transition: "transform 0.2s, box-shadow 0.2s",
+    boxShadow: "var(--shadow)",
+    fontFamily: "system-ui, sans-serif",
+  },
+  image: {
+    width: "100%",
+    height: "150px",
+    objectFit: "cover",
+    background: "var(--input-bg)",
+  },
+  body: {
+    padding: "16px",
+  },
+  category: {
+    fontSize: "11px",
+    fontWeight: 700,
+    color: "#FF3D9A",
+    textTransform: "uppercase",
+    letterSpacing: "0.5px",
+  },
+  name: {
+    fontFamily: "var(--font-head)",
+    fontSize: "16px",
+    fontWeight: 700,
+    color: "var(--text)",
+    margin: "8px 0 4px",
+  },
+  meta: {
+    fontSize: "13px",
+    color: "var(--muted)",
+    margin: "2px 0",
+  },
+  bottom: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: "12px",
+    paddingTop: "12px",
+    borderTop: "1px solid var(--border)",
+  },
+  rating: {
+    fontSize: "13px",
+    color: "var(--muted)",
+    fontWeight: 600,
+  },
+  price: {
+    fontSize: "15px",
+    fontWeight: 800,
+    background: "linear-gradient(135deg,#FF3D9A,#FF6B35)",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+  },
+};
 
 export default VendorCard;
