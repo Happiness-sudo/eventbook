@@ -3,6 +3,9 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 
+/* HOME */
+import Home from "./pages/home.jsx";
+
 /* AUTH */
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
@@ -33,8 +36,8 @@ const App = () => {
         <BrowserRouter>
           <Routes>
 
-            {/* DEFAULT */}
-            <Route path="/" element={<Navigate to="/login" replace />} />
+            {/* HOME */}
+            <Route path="/" element={<Home />} />
 
             {/* AUTH */}
             <Route path="/login" element={<Login />} />
@@ -47,20 +50,57 @@ const App = () => {
             <Route path="/admin/bookings" element={<AdminBookings />} />
 
             {/* VENDOR */}
-            <Route path="/vendor/dashboard" element={<VendorDashboard />} />
-            <Route path="/vendor/bookings" element={<BookingRequests />} />
-            <Route path="/vendor/profile/edit" element={<EditVendorProfile />} />
-            <Route path="/vendor/services" element={<ManageServices />} />
+            <Route
+              path="/vendor/dashboard"
+              element={<VendorDashboard />}
+            />
+
+            <Route
+              path="/vendor/bookings"
+              element={<BookingRequests />}
+            />
+
+            <Route
+              path="/vendor/profile/edit"
+              element={<EditVendorProfile />}
+            />
+
+            <Route
+              path="/vendor/services"
+              element={<ManageServices />}
+            />
 
             {/* USER */}
-            <Route path="/vendors" element={<VendorMarketplace />} />
-            <Route path="/vendors/:id" element={<VendorProfile />} />
-            <Route path="/my-bookings" element={<MyBookings />} />
-            <Route path="/create-event" element={<CreateEvent />} />
-            <Route path="/my-events" element={<MyEvents />} />
+            <Route
+              path="/vendors"
+              element={<VendorMarketplace />}
+            />
+
+            <Route
+              path="/vendors/:id"
+              element={<VendorProfile />}
+            />
+
+            <Route
+              path="/my-bookings"
+              element={<MyBookings />}
+            />
+
+            <Route
+              path="/create-event"
+              element={<CreateEvent />}
+            />
+
+            <Route
+              path="/my-events"
+              element={<MyEvents />}
+            />
 
             {/* FALLBACK */}
-            <Route path="*" element={<Navigate to="/login" replace />} />
+            <Route
+              path="*"
+              element={<Navigate to="/" replace />}
+            />
 
           </Routes>
         </BrowserRouter>
