@@ -1,8 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-
-// swap for real import once AuthContext is on main:
-// import { useAuth } from "../context/AuthContext";
-const useAuth = () => ({ user: null, logout: () => {} });
+import { useAuth } from "../context/AuthContext";
 
 function Navbar() {
   const { user, logout } = useAuth();
@@ -13,101 +10,112 @@ function Navbar() {
     navigate("/login");
   };
 
-  const navStyle = {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "12px 24px",
-    background: "#fff",
-    borderBottom: "1px solid #e5e4e7",
-    boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-    fontFamily: "system-ui, sans-serif",
-  };
-
-  const brandStyle = {
-    fontSize: "22px",
-    fontWeight: 700,
-    color: "#aa3bff",
-    textDecoration: "none",
-    letterSpacing: "-0.5px",
-  };
-
-  const linksContainer = {
-    display: "flex",
-    gap: "20px",
-    alignItems: "center",
-  };
-
-  const linkStyle = {
-    color: "#08060d",
-    textDecoration: "none",
-    fontSize: "15px",
-    fontWeight: 500,
-  };
-
-  const buttonBase = {
-    padding: "8px 16px",
-    borderRadius: "6px",
-    border: "none",
-    cursor: "pointer",
-    fontSize: "14px",
-    fontWeight: 600,
-    fontFamily: "inherit",
-  };
-
-  const primaryBtn = { ...buttonBase, background: "#aa3bff", color: "#fff" };
-  const secondaryBtn = {
-    ...buttonBase,
-    background: "transparent",
-    color: "#08060d",
-    border: "1px solid #e5e4e7",
-  };
-
-  const greetingStyle = {
-    fontSize: "14px",
-    color: "#6b6375",
-    fontWeight: 500,
-  };
-
   return (
-    <nav style={navStyle}>
-      <Link to="/" style={brandStyle}>EventBook</Link>
+    <nav style={S.nav}>
+      <Link to="/" style={S.brand}>EventBook</Link>
 
-      <div style={linksContainer}>
-        <Link to="/vendors" style={linkStyle}>Browse Vendors</Link>
+      <div style={S.links}>
+        <Link to="/vendors" style={S.link}>Browse Vendors</Link>
 
         {user?.role === "user" && (
           <>
-            <Link to="/events/new" style={linkStyle}>Create Event</Link>
-            <Link to="/my-events" style={linkStyle}>My Events</Link>
-            <Link to="/my-bookings" style={linkStyle}>My Bookings</Link>
+            <Link to="/events/new" style={S.link}>Create Event</Link>
+            <Link to="/my-events" style={S.link}>My Events</Link>
+            <Link to="/my-bookings" style={S.link}>My Bookings</Link>
           </>
         )}
 
         {user?.role === "vendor" && (
-          <Link to="/vendor/dashboard" style={linkStyle}>Vendor Dashboard</Link>
+          <Link to="/vendor/dashboard" style={S.link}>Vendor Dashboard</Link>
         )}
 
         {user?.role === "admin" && (
-          <Link to="/admin/dashboard" style={linkStyle}>Admin Dashboard</Link>
+          <Link to="/admin/dashboard" style={S.link}>Admin Dashboard</Link>
         )}
       </div>
 
-      <div style={linksContainer}>
+      <div style={S.right}>
         {!user ? (
           <>
-            <Link to="/login"><button style={secondaryBtn}>Login</button></Link>
-            <Link to="/register"><button style={primaryBtn}>Register</button></Link>
+            <Link to="/login" style={S.linkBtn}>Login</Link>
+            <Link to="/register" style={S.primaryBtn}>Register</Link>
           </>
         ) : (
           <>
-            <span style={greetingStyle}>Hi, {user.name || "User"}</span>
-            <button style={secondaryBtn} onClick={handleLogout}>Logout</button>
+            <span style={S.greeting}>Hi, {user.name || "User"}</span>
+            <button style={S.linkBtn} onClick={handleLogout}>Logout</button>
           </>
         )}
       </div>
     </nav>
   );
 }
+
+const S = {
+  nav: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "16px 32px",
+    background: "var(--card-bg)",
+    borderBottom: "1px solid var(--border)",
+    fontFamily: "system-ui, sans-serif",
+  },
+  brand: {
+    fontFamily: "var(--font-head)",
+    fontSize: "20px",
+    fontWeight: 800,
+    background: "linear-gradient(135deg,#FF3D9A,#FF6B35)",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+    textDecoration: "none",
+  },
+  links: {
+    display: "flex",
+    gap: "24px",
+    alignItems: "center",
+  },
+  link: {
+    color: "var(--text)",
+    textDecoration: "none",
+    fontSize: "14px",
+    fontWeight: 600,
+  },
+  right: {
+    display: "flex",
+    gap: "12px",
+    alignItems: "center",
+  },
+  linkBtn: {
+    padding: "8px 16px",
+    borderRadius: "100px",
+    border: "1px solid var(--border)",
+    background: "transparent",
+    color: "var(--text)",
+    fontSize: "13px",
+    fontWeight: 600,
+    cursor: "pointer",
+    fontFamily: "inherit",
+    textDecoration: "none",
+    display: "inline-block",
+  },
+  primaryBtn: {
+    padding: "8px 18px",
+    borderRadius: "100px",
+    border: "none",
+    background: "linear-gradient(135deg,#FF3D9A,#FF6B35)",
+    color: "#fff",
+    fontSize: "13px",
+    fontWeight: 700,
+    cursor: "pointer",
+    textDecoration: "none",
+    display: "inline-block",
+  },
+  greeting: {
+    fontSize: "13px",
+    color: "var(--muted)",
+    fontWeight: 600,
+  },
+};
 
 export default Navbar;
