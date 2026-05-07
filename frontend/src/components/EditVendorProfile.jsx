@@ -1,62 +1,150 @@
-import { useState } from 'react';
+import { useState } from "react";
 
-const EditVendorProfile = ({ vendor, onSave }) => {
+function EditVendorProfile() {
   const [formData, setFormData] = useState({
-    name: vendor?.name || '',
-    description: vendor?.description || '',
-    hourlyRate: vendor?.hourlyRate || '',
-    category: vendor?.category || ''
+    name: "",
+    service: "",
+    location: "",
+    price: "",
+    image: "",
+    description: "",
   });
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(formData);
+
+    const existingVendors =
+      JSON.parse(localStorage.getItem("vendors")) || [];
+
+    existingVendors.push(formData);
+
+    localStorage.setItem(
+      "vendors",
+      JSON.stringify(existingVendors)
+    );
+
+    alert("Vendor profile created successfully!");
+
+    setFormData({
+      name: "",
+      service: "",
+      location: "",
+      price: "",
+      image: "",
+      description: "",
+    });
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
-      <h2 className="text-xl font-bold mb-4">Edit Profile</h2>
-      <form onSubmit={handleSubmit}>
+    <div style={styles.container}>
+      <h1>Create Vendor Profile</h1>
+
+      <form onSubmit={handleSubmit} style={styles.form}>
         <input
           type="text"
+          name="name"
           placeholder="Business Name"
           value={formData.name}
-          onChange={(e) => setFormData({...formData, name: e.target.value})}
-          className="w-full p-2 border rounded mb-3"
+          onChange={handleChange}
           required
+          style={styles.input}
         />
-        <textarea
-          placeholder="Description"
-          value={formData.description}
-          onChange={(e) => setFormData({...formData, description: e.target.value})}
-          className="w-full p-2 border rounded mb-3"
-          rows="3"
+
+        <input
+          type="text"
+          name="service"
+          placeholder="Service Type"
+          value={formData.service}
+          onChange={handleChange}
+          required
+          style={styles.input}
         />
+
+        <input
+          type="text"
+          name="location"
+          placeholder="Location"
+          value={formData.location}
+          onChange={handleChange}
+          required
+          style={styles.input}
+        />
+
         <input
           type="number"
-          placeholder="Hourly Rate"
-          value={formData.hourlyRate}
-          onChange={(e) => setFormData({...formData, hourlyRate: e.target.value})}
-          className="w-full p-2 border rounded mb-3"
+          name="price"
+          placeholder="Price in KSh"
+          value={formData.price}
+          onChange={handleChange}
           required
+          style={styles.input}
         />
-        <select
-          value={formData.category}
-          onChange={(e) => setFormData({...formData, category: e.target.value})}
-          className="w-full p-2 border rounded mb-4"
+
+        <input
+          type="text"
+          name="image"
+          placeholder="Image URL"
+          value={formData.image}
+          onChange={handleChange}
           required
-        >
-          <option value="">Select Category</option>
-          <option value="photography">Photography</option>
-          <option value="catering">Catering</option>
-          <option value="decoration">Decoration</option>
-          <option value="dj">DJ</option>
-          <option value="venue">Venue</option>
-        </select>
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">Save Changes</button>
+          style={styles.input}
+        />
+
+        <textarea
+          name="description"
+          placeholder="Describe your services"
+          value={formData.description}
+          onChange={handleChange}
+          required
+          style={styles.textarea}
+        />
+
+        <button type="submit" style={styles.button}>
+          Save Profile
+        </button>
       </form>
     </div>
   );
+}
+
+const styles = {
+  container: {
+    padding: "40px",
+    maxWidth: "600px",
+    margin: "0 auto",
+    color: "white",
+  },
+  form: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "15px",
+  },
+  input: {
+    padding: "12px",
+    borderRadius: "8px",
+    border: "1px solid #ccc",
+  },
+  textarea: {
+    padding: "12px",
+    borderRadius: "8px",
+    border: "1px solid #ccc",
+    minHeight: "120px",
+  },
+  button: {
+    padding: "14px",
+    background: "#ff4d6d",
+    color: "white",
+    border: "none",
+    borderRadius: "8px",
+    cursor: "pointer",
+  },
 };
 
 export default EditVendorProfile;

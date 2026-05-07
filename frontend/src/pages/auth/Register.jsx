@@ -25,19 +25,22 @@ const Register = () => {
     setLoading(true);
 
     try {
-      // Try real API first
+      // REAL API
       const res = await registerUser(form);
-      login(res.data.user, res.data.token);
+      const user = res.data.user;
 
-      if (res.data.user.role === "vendor") {
-        navigate("/vendor/dashboard");
-      } else if (res.data.user.role === "admin") {
+      login(user, res.data.token);
+
+      if (user.role === "vendor") {
+        navigate("/vendor/profile/edit");
+      } else if (user.role === "admin") {
         navigate("/admin");
       } else {
         navigate("/vendors");
       }
+
     } catch (err) {
-      // Fallback (works without backend)
+      // FALLBACK (no backend)
       const fakeUser = {
         name: form.name,
         email: form.email,
@@ -47,9 +50,11 @@ const Register = () => {
       login(fakeUser, "fake-token");
 
       if (fakeUser.role === "vendor") {
-        navigate("/vendor/dashboard");
-      } else {
+        navigate("/vendor/profile/edit");
+      } else if (fakeUser.role === "admin") {
         navigate("/admin");
+      } else {
+        navigate("/vendors");
       }
     } finally {
       setLoading(false);
@@ -58,36 +63,9 @@ const Register = () => {
 
   return (
     <div style={S.page}>
-      <div
-        style={{
-          ...S.blob,
-          width: 320,
-          height: 320,
-          background: "#4361EE",
-          top: -80,
-          right: -60,
-        }}
-      />
-      <div
-        style={{
-          ...S.blob,
-          width: 200,
-          height: 200,
-          background: "#FF3D9A",
-          bottom: 80,
-          right: 200,
-        }}
-      />
-      <div
-        style={{
-          ...S.blob,
-          width: 160,
-          height: 160,
-          background: "#06D6A0",
-          bottom: -40,
-          left: 80,
-        }}
-      />
+      <div style={{ ...S.blob, width: 320, height: 320, background: "#4361EE", top: -80, right: -60 }} />
+      <div style={{ ...S.blob, width: 200, height: 200, background: "#FF3D9A", bottom: 80, right: 200 }} />
+      <div style={{ ...S.blob, width: 160, height: 160, background: "#06D6A0", bottom: -40, left: 80 }} />
 
       <button onClick={toggleTheme} style={S.themeBtn}>
         {theme === "dark" ? "☀️" : "🌙"}
