@@ -7,7 +7,7 @@ export default function Home() {
         <h1 style={styles.title}>EventBook 🎉</h1>
 
         <p style={styles.text}>
-          Welcome to EventBook — your all-in-one platform to find vendors,
+          Welcome to EventBook, your all in one platform to find vendors,
           book services, and manage events easily.
         </p>
 
