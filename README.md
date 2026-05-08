@@ -66,7 +66,7 @@ src/
 
  1. Clone the repository
 
-git clone https://github.com/YOUR_USERNAME/eventbook.git
+git clone https://github.com/Happiness-sudo/eventbook.git
 
 
  2. Navigate into the project
