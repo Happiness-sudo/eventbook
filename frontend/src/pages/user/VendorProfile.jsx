@@ -1,224 +1,162 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import emailjs from "@emailjs/browser";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 const VendorProfile = () => {
   const { id } = useParams();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const [vendor, setVendor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
-  const [bookingName, setBookingName] = useState("");
-  const [bookingEmail, setBookingEmail] = useState("");
-  const [sending, setSending] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [bookingDate, setBookingDate] = useState("");
+  const [message, setMessage] = useState("");
+  const [bookingStatus, setBookingStatus] = useState("");
 
   useEffect(() => {
-    const vendors =
-      JSON.parse(localStorage.getItem("vendors")) || [];
-
-    const foundVendor = vendors.find(
-      (v) => String(v.id) === String(id)
-    );
-
-    if (foundVendor) {
-      setVendor(foundVendor);
-    } else {
-      setError("Vendor not found.");
-    }
-
-    setLoading(false);
+    fetch(`http://localhost:5000/vendors/${id}`)
+      .then((r) => {
+        if (!r.ok) throw new Error("not found");
+        return r.json();
+      })
+      .then((data) => {
+        setVendor(data);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError("Vendor not found.");
+        setLoading(false);
+      });
   }, [id]);
 
-  const handleBook = async () => {
-    if (!bookingName || !bookingEmail) {
-      alert("Please enter your name and email.");
-      return;
-    }
-
-    setSending(true);
+  const handleBook = async (e) => {
+    e.preventDefault();
+    setBookingStatus("");
 
     try {
-      await emailjs.send(
-        "service_x5lvidl",
-        "template_eb0ilye",
-        {
-          user_name: bookingName,
-          user_email: bookingEmail,
-          vendor_name: vendor.name,
-          vendor_service:
-            vendor.service || vendor.category,
-          vendor_location: vendor.location,
-          vendor_price: vendor.price,
-        },
-        "zOnChD6Ty4Bvo1O24"
-      );
-
-      const existingBookings =
-        JSON.parse(localStorage.getItem("bookings")) || [];
-
-      const newBooking = {
-        id: Date.now().toString(),
-        customerName: bookingName,
-        customerEmail: bookingEmail,
+      const booking = {
         vendorId: vendor.id,
-        vendorName: vendor.name,
-        service:
-          vendor.service || vendor.category,
-        price: vendor.price,
-        location: vendor.location,
-        status: "Pending",
+        userId: user?.id || 1,
+        userName: user?.name || "Guest",
+        eventDate: bookingDate,
+        message,
+        amount: vendor.price || 0,
+        status: "pending",
+        createdAt: new Date().toISOString(),
       };
 
-      localStorage.setItem(
-        "bookings",
-        JSON.stringify([
-          ...existingBookings,
-          newBooking,
-        ])
-      );
+      const res = await fetch("http://localhost:5000/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(booking),
+      });
 
-      alert(
-        "Booking successful! Confirmation email sent."
-      );
+      if (!res.ok) throw new Error("Failed");
 
-      setBookingName("");
-      setBookingEmail("");
+      setBookingStatus("✅ Booking sent! The vendor will review it.");
+      setShowForm(false);
+      setBookingDate("");
+      setMessage("");
     } catch (err) {
-      console.error(err);
-
-      alert(
-        "Booking saved, but email failed."
-      );
-    } finally {
-      setSending(false);
+      setBookingStatus("Could not send booking. Try again.");
     }
   };
 
-  if (loading) {
+  if (loading)
     return (
       <div style={S.page}>
-        <p style={S.message}>
-          Loading vendor details...
-        </p>
+        <div style={S.loading}>Loading vendor...</div>
       </div>
     );
-  }
 
-  if (error) {
+  if (error)
     return (
       <div style={S.page}>
-        <button
-          style={S.backBtn}
-          onClick={() => navigate("/vendors")}
-        >
-          ← Back to Vendors
-        </button>
-
-        <div style={S.error}>
-          {error}
-        </div>
+        <Link to="/vendors" style={S.backBtn}>← Back to Vendors</Link>
+        <div style={S.error}>{error}</div>
       </div>
     );
-  }
-
-  if (!vendor) return null;
-
-  const formattedPrice = Number(
-    vendor.price
-  ).toLocaleString();
 
   return (
     <div style={S.page}>
-      <button
-        style={S.backBtn}
-        onClick={() => navigate("/vendors")}
-      >
-        ← Back to Vendors
-      </button>
+      <Link to="/vendors" style={S.backBtn}>← Back to Vendors</Link>
 
       <div style={S.card}>
-        <img
-          src={
-            vendor.image ||
-            "https://via.placeholder.com/800x400?text=No+Image"
-          }
-          alt={vendor.name}
-          style={S.heroImage}
-        />
-
+        {vendor.image && (
+          <img src={vendor.image} alt={vendor.name} style={S.image} />
+        )}
         <div style={S.body}>
-          <span style={S.category}>
-            {vendor.category ||
-              vendor.service}
-          </span>
-
-          <h1 style={S.name}>
-            {vendor.name}
-          </h1>
+          <div style={S.category}>{vendor.category}</div>
+          <h1 style={S.title}>{vendor.name}</h1>
+          <p style={S.location}>📍 {vendor.location || "Kenya"}</p>
 
           <div style={S.metaRow}>
-            <span style={S.meta}>
-              {vendor.location}
-            </span>
-
-            <span style={S.meta}>
-              ★ {vendor.rating || 5} / 5
+            <span style={S.rating}>⭐ {vendor.rating?.toFixed(1) || "0.0"}</span>
+            <span style={S.price}>
+              KES {(vendor.price || 0).toLocaleString()}
             </span>
           </div>
 
           <p style={S.description}>
-            {vendor.description}
+            {vendor.description ||
+              "Professional services for your special events."}
           </p>
 
-          <div style={S.priceBox}>
-            <div>
-              <p style={S.priceLabel}>
-                Starting from
-              </p>
+          {vendor.services && vendor.services.length > 0 && (
+            <>
+              <div style={S.label}>Services Offered</div>
+              <ul style={S.serviceList}>
+                {vendor.services.map((s, i) => (
+                  <li key={i} style={S.serviceItem}>{s}</li>
+                ))}
+              </ul>
+            </>
+          )}
 
-              <p style={S.price}>
-                KES {formattedPrice}
-              </p>
-            </div>
+          {bookingStatus && <div style={S.statusMsg}>{bookingStatus}</div>}
 
-            <div style={S.bookingBox}>
-              <input
-                type="text"
-                placeholder="Your Name"
-                value={bookingName}
-                onChange={(e) =>
-                  setBookingName(
-                    e.target.value
-                  )
-                }
-                style={S.input}
-              />
-
-              <input
-                type="email"
-                placeholder="Your Email"
-                value={bookingEmail}
-                onChange={(e) =>
-                  setBookingEmail(
-                    e.target.value
-                  )
-                }
-                style={S.input}
-              />
-
-              <button
-                style={S.bookBtn}
-                onClick={handleBook}
-                disabled={sending}
-              >
-                {sending
-                  ? "Sending..."
-                  : "Book Now →"}
-              </button>
-            </div>
-          </div>
+          {!showForm ? (
+            <button onClick={() => setShowForm(true)} style={S.bookBtn}>
+              Book This Vendor →
+            </button>
+          ) : (
+            <form onSubmit={handleBook} style={S.form}>
+              <div style={S.field}>
+                <label style={S.label}>Event Date</label>
+                <input
+                  type="date"
+                  value={bookingDate}
+                  onChange={(e) => setBookingDate(e.target.value)}
+                  required
+                  style={S.input}
+                />
+              </div>
+              <div style={S.field}>
+                <label style={S.label}>Message to Vendor</label>
+                <textarea
+                  placeholder="Tell them about your event..."
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  required
+                  style={{ ...S.input, minHeight: "80px" }}
+                />
+              </div>
+              <div style={S.formActions}>
+                <button
+                  type="button"
+                  onClick={() => setShowForm(false)}
+                  style={S.cancelBtn}
+                >
+                  Cancel
+                </button>
+                <button type="submit" style={S.bookBtn}>
+                  Send Booking →
+                </button>
+              </div>
+            </form>
+          )}
         </div>
       </div>
     </div>
@@ -229,135 +167,179 @@ const S = {
   page: {
     minHeight: "100vh",
     background: "var(--bg)",
-    padding: "40px 32px",
-    fontFamily: "system-ui, sans-serif",
+    padding: "24px 20px 60px",
   },
-
   backBtn: {
-    background: "transparent",
-    border: "1px solid var(--border)",
-    color: "var(--text)",
-    padding: "8px 16px",
+    display: "inline-block",
+    padding: "10px 18px",
     borderRadius: "100px",
+    border: "1px solid var(--border)",
+    background: "var(--card-bg)",
+    color: "var(--text)",
+    textDecoration: "none",
     fontSize: "13px",
     fontWeight: 600,
-    cursor: "pointer",
     marginBottom: "20px",
   },
-
+  loading: {
+    color: "var(--muted)",
+    fontSize: "14px",
+    textAlign: "center",
+    padding: "60px",
+  },
+  error: {
+    background: "rgba(255,61,154,.1)",
+    border: "1px solid rgba(255,61,154,.3)",
+    color: "#FF3D9A",
+    padding: "16px 20px",
+    borderRadius: "12px",
+    fontSize: "14px",
+    fontWeight: 600,
+  },
   card: {
+    maxWidth: "720px",
+    margin: "0 auto",
     background: "var(--card-bg)",
     border: "1px solid var(--border)",
-    borderRadius: "24px",
+    borderRadius: "20px",
     overflow: "hidden",
-    maxWidth: "900px",
-    margin: "0 auto",
     boxShadow: "var(--shadow)",
   },
-
-  heroImage: {
+  image: {
     width: "100%",
     height: "320px",
     objectFit: "cover",
+    display: "block",
   },
-
   body: {
     padding: "32px",
   },
-
   category: {
     fontSize: "11px",
     fontWeight: 700,
     color: "#FF3D9A",
     textTransform: "uppercase",
+    letterSpacing: "0.5px",
+    marginBottom: "8px",
   },
-
-  name: {
-    fontSize: "30px",
+  title: {
+    fontFamily: "var(--font-head)",
+    fontSize: "28px",
     fontWeight: 800,
     color: "var(--text)",
-    margin: "10px 0",
+    marginBottom: "6px",
   },
-
+  location: {
+    fontSize: "14px",
+    color: "var(--muted)",
+    marginBottom: "16px",
+  },
   metaRow: {
     display: "flex",
     gap: "20px",
+    alignItems: "center",
     marginBottom: "20px",
   },
-
-  meta: {
+  rating: {
+    fontSize: "14px",
+    fontWeight: 600,
+    color: "var(--text)",
+  },
+  price: {
+    fontFamily: "var(--font-head)",
+    fontSize: "20px",
+    fontWeight: 800,
+    background: "linear-gradient(135deg,#FF3D9A,#FF6B35)",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+  },
+  description: {
     fontSize: "14px",
     color: "var(--muted)",
+    lineHeight: 1.6,
+    marginBottom: "20px",
   },
-
-  description: {
-    fontSize: "15px",
-    lineHeight: 1.7,
-    color: "var(--text)",
-    marginBottom: "24px",
-  },
-
-  priceBox: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "20px",
-    borderTop: "1px solid var(--border)",
-    paddingTop: "24px",
-  },
-
-  priceLabel: {
-    fontSize: "12px",
+  label: {
+    display: "block",
+    fontSize: "11px",
+    fontWeight: 600,
     color: "var(--muted)",
     textTransform: "uppercase",
+    letterSpacing: "0.5px",
+    marginBottom: "8px",
   },
-
-  price: {
-    fontSize: "28px",
-    fontWeight: 800,
-    color: "#FF3D9A",
-  },
-
-  bookingBox: {
+  serviceList: {
+    listStyle: "none",
+    padding: 0,
+    margin: "0 0 24px",
     display: "flex",
-    flexDirection: "column",
-    gap: "12px",
-    width: "100%",
+    flexWrap: "wrap",
+    gap: "8px",
   },
-
-  input: {
-    width: "100%",
-    padding: "12px",
-    borderRadius: "10px",
-    border: "1px solid var(--border)",
+  serviceItem: {
+    padding: "6px 14px",
+    borderRadius: "100px",
     background: "var(--input-bg)",
+    border: "1px solid var(--border)",
+    fontSize: "12px",
     color: "var(--text)",
-    fontSize: "14px",
   },
-
+  statusMsg: {
+    background: "rgba(255,61,154,.1)",
+    border: "1px solid rgba(255,61,154,.3)",
+    color: "#FF3D9A",
+    padding: "10px 14px",
+    borderRadius: "12px",
+    fontSize: "13px",
+    fontWeight: 600,
+    marginBottom: "16px",
+  },
   bookBtn: {
     padding: "14px 28px",
     borderRadius: "100px",
     border: "none",
-    background:
-      "linear-gradient(135deg,#FF3D9A,#FF6B35)",
+    background: "linear-gradient(135deg,#FF3D9A,#FF6B35)",
     color: "#fff",
-    fontSize: "14px",
     fontWeight: 700,
+    fontSize: "14px",
     cursor: "pointer",
   },
-
-  message: {
-    textAlign: "center",
-    color: "var(--muted)",
-    padding: "60px 0",
+  cancelBtn: {
+    padding: "14px 28px",
+    borderRadius: "100px",
+    border: "1px solid var(--border)",
+    background: "var(--card-bg)",
+    color: "var(--text)",
+    fontWeight: 600,
+    fontSize: "14px",
+    cursor: "pointer",
   },
-
-  error: {
-    color: "#FF3D9A",
-    background: "rgba(255,61,154,.1)",
-    padding: "14px",
+  form: {
+    background: "var(--input-bg)",
+    border: "1px solid var(--border)",
+    borderRadius: "16px",
+    padding: "24px",
+    marginTop: "12px",
+  },
+  field: {
+    marginBottom: "16px",
+  },
+  input: {
+    width: "100%",
+    padding: "12px 14px",
     borderRadius: "12px",
-    maxWidth: "500px",
+    border: "1px solid var(--border)",
+    background: "var(--card-bg)",
+    color: "var(--text)",
+    fontFamily: "inherit",
+    fontSize: "14px",
+    boxSizing: "border-box",
+    outline: "none",
+  },
+  formActions: {
+    display: "flex",
+    gap: "10px",
+    justifyContent: "flex-end",
   },
 };
 

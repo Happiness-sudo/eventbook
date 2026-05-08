@@ -9,6 +9,7 @@ const CreateEvent = () => {
 
   const [form, setForm] = useState({
     title: "",
+    eventType: "",
     date: "",
     location: "",
     budget: "",
@@ -43,7 +44,7 @@ const CreateEvent = () => {
     <div style={S.page}>
       <div style={S.card}>
         <div style={S.logo}>EventBook</div>
-        <h1 style={S.title}>Create Event </h1>
+        <h1 style={S.title}>Create Event 🎯</h1>
         <p style={S.sub}>Tell us about your event so we can help you find vendors</p>
 
         {error && <div style={S.error}>{error}</div>}
@@ -70,6 +71,25 @@ const CreateEvent = () => {
               />
             </div>
           ))}
+
+          <div style={S.field}>
+            <label style={S.label}>Event Type</label>
+            <select
+              name="eventType"
+              value={form.eventType}
+              onChange={(e) => setForm({ ...form, eventType: e.target.value })}
+              style={S.input}
+              required
+            >
+              <option value="">Select event type</option>
+              <option value="Wedding">Wedding</option>
+              <option value="Birthday">Birthday</option>
+              <option value="Corporate">Corporate</option>
+              <option value="Anniversary">Anniversary</option>
+              <option value="Graduation">Graduation</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
 
           <div style={S.field}>
             <label style={S.label}>Description</label>

@@ -19,7 +19,7 @@ function Navbar() {
 
         {user?.role === "user" && (
           <>
-            <Link to="/events/new" style={S.link}>Create Event</Link>
+            <Link to="/create-event" style={S.link}>Create Event</Link>
             <Link to="/my-events" style={S.link}>My Events</Link>
             <Link to="/my-bookings" style={S.link}>My Bookings</Link>
           </>
