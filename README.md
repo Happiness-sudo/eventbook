@@ -135,7 +135,7 @@ Frontend deployment will be done using:
 
 [Vercel](https://vercel.com/?utm_source=chatgpt.com)
 
----
+
 
 # Future Improvements
 
@@ -146,8 +146,11 @@ Frontend deployment will be done using:
 * Google Maps integration
 * Cloudinary image uploads
 
----
+
 
 # Authors
 
-Developed collaboratively by the EventBook team as a frontend-first event vendor booking platform project.
+Happiness-sudo
+sharleenS
+aminSHARIFF
+SolomonKirumba
