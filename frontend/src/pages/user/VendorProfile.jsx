@@ -16,20 +16,32 @@ const VendorProfile = () => {
   const [bookingStatus, setBookingStatus] = useState("");
 
   useEffect(() => {
-    fetch(`http://localhost:5000/vendors/${id}`)
-      .then((r) => {
-        if (!r.ok) throw new Error("not found");
-        return r.json();
-      })
-      .then((data) => {
+  const loadVendor = async () => {
+    try {
+      const res = await fetch(`http://localhost:5000/vendors/${id}`);
+      if (res.ok) {
+        const data = await res.json();
         setVendor(data);
         setLoading(false);
-      })
-      .catch(() => {
-        setError("Vendor not found.");
-        setLoading(false);
-      });
-  }, [id]);
+        return;
+      }
+    } catch (err) {
+      // fall through to localStorage
+    }
+
+    const localRaw = localStorage.getItem("vendors");
+    const localVendors = localRaw ? JSON.parse(localRaw) : [];
+    const found = localVendors.find((v) => String(v.id) === String(id));
+
+    if (found) {
+      setVendor(found);
+    } else {
+      setError("Vendor not found.");
+    }
+    setLoading(false);
+  };
+  loadVendor();
+}, [id]);
 
   const handleBook = async (e) => {
     e.preventDefault();
