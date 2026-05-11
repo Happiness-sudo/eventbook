@@ -80,6 +80,20 @@ git clone https://github.com/Happiness-sudo/eventbook.git
 
   npm run dev
 
+ 
+On a different terminal run
+  
+   npm run server
+
+
+Endpoints:
+   
+http://localhost:5000/users
+http://localhost:5000/vendors
+http://localhost:5000/events
+http://localhost:5000/bookings
+http://localhost:5000/services
+
 
 # Environment Variables
 
