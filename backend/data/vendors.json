@@ -1,1 +1,20 @@
-[]
+[
+    {
+        "id": "2886c078-2b86-41f2-9850-80acb3a043ee",
+        "name": "DJ Mo",
+        "service": "DJ Services",
+        "price": 15000,
+        "location": "Nairobi",
+        "image": "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f",
+        "description": "Professional event DJ"
+    },
+    {
+        "id": "17ce7c35-a909-4a7c-9d3a-d4572829bcd7",
+        "name": "Susan K.",
+        "service": "Make up",
+        "price": 5000,
+        "location": "Ruiru",
+        "image": "https://i.pinimg.com/736x/42/78/53/4278530398183adf7aac72d3bbc7238a.jpg",
+        "description": "Make up artist"
+    }
+]
