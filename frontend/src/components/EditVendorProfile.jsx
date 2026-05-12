@@ -13,6 +13,8 @@ function EditVendorProfile() {
     description: "",
   });
 
+  const [loading, setLoading] = useState(false);
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -20,43 +22,56 @@ function EditVendorProfile() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const existingVendors =
-      JSON.parse(localStorage.getItem("vendors")) || [];
+    setLoading(true);
 
-    const newVendor = {
-      id: Date.now().toString(),
-      name: formData.name,
-      service: formData.service,
-      category: formData.service,
-      location: formData.location,
-      price: Number(formData.price),
-      image: formData.image,
-      description: formData.description,
-      rating: 5,
-    };
+    try {
+      const response = await fetch(
+        "http://127.0.0.1:5000/vendors",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: formData.name,
+            service: formData.service,
+            location: formData.location,
+            price: Number(formData.price),
+            image: formData.image,
+            description: formData.description,
+          }),
+        }
+      );
 
-    existingVendors.push(newVendor);
+      const data = await response.json();
 
-    localStorage.setItem(
-      "vendors",
-      JSON.stringify(existingVendors)
-    );
+      if (!response.ok) {
+        alert(data.error || "Something went wrong");
+        return;
+      }
 
-    alert("Vendor profile created successfully!");
+      alert("Vendor profile created successfully!");
 
-    setFormData({
-      name: "",
-      service: "",
-      location: "",
-      price: "",
-      image: "",
-      description: "",
-    });
+      setFormData({
+        name: "",
+        service: "",
+        location: "",
+        price: "",
+        image: "",
+        description: "",
+      });
 
-    navigate("/vendor/dashboard");
+      navigate("/vendor/dashboard");
+
+    } catch (error) {
+      console.error(error);
+      alert("Server error. Make sure backend is running.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -137,8 +152,9 @@ function EditVendorProfile() {
           <button
             type="submit"
             style={styles.button}
+            disabled={loading}
           >
-            Save Profile
+            {loading ? "Saving..." : "Save Profile"}
           </button>
         </form>
       </div>

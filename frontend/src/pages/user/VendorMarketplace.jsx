@@ -1,11 +1,25 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import VendorCard from "../../components/VendorCard";
 
 function VendorMarketplace() {
   const navigate = useNavigate();
 
-  const vendors =
-    JSON.parse(localStorage.getItem("vendors")) || [];
+  const [vendors, setVendors] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("http://127.0.0.1:5000/vendors")
+      .then((res) => res.json())
+      .then((data) => {
+        setVendors(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, []);
 
   const handleViewVendor = (vendor) => {
     navigate(`/vendors/${vendor.id}`);
@@ -15,7 +29,9 @@ function VendorMarketplace() {
     <div style={styles.container}>
       <h1 style={styles.title}>Available Vendors</h1>
 
-      {vendors.length === 0 ? (
+      {loading ? (
+        <p style={styles.empty}>Loading vendors...</p>
+      ) : vendors.length === 0 ? (
         <p style={styles.empty}>
           No vendors available yet.
         </p>
@@ -39,11 +55,13 @@ const styles = {
     padding: "40px",
     color: "white",
     minHeight: "100vh",
+    background: "var(--bg)",
   },
 
   title: {
     fontSize: "32px",
     marginBottom: "30px",
+    color: "var(--text)",
   },
 
   grid: {
