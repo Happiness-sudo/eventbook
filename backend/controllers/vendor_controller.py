@@ -1,92 +1,65 @@
-from utils.file_handler import read_data, write_data
-from models.vendor_model import build_vendor
-import uuid
-import os
-import requests
+from flask import jsonify, request
+from app import db
+from models.vendor_model import Vendor
 
 
-# fetch image from Unsplash 
-def fetch_unsplash_image(service):
-    api_key = os.environ.get("UNSPLASH_KEY")
-    if not api_key:
-        return None
-
-    try:
-        url = "https://api.unsplash.com/photos/random"
-        headers = {"Authorization": f"Client-ID {api_key}"}
-        params = {"query": service, "orientation": "landscape"}
-        response = requests.get(url, headers=headers, params=params, timeout=5)
-
-        if response.status_code == 200:
-            data = response.json()
-            return data["urls"]["regular"]
-    except Exception as e:
-        print("Could not fetch image:", e)
-
-    return None
-
-
-# Get all vendors
 def get_all_vendors():
-    return read_data("vendors.json")
+    vendors = Vendor.query.all()
+    return jsonify([v.to_dict() for v in vendors]), 200
 
 
-# Get one vendor by id
-def get_vendor_by_id(vendor_id):
-    vendors = read_data("vendors.json")
-    for v in vendors:
-        if v.get("id") == vendor_id:
-            return v
-    return None
-
-
-# Create new vendor
-def create_vendor(data):
-    # Check required fields
-    required_fields = ["name", "service", "price", "location"]
-    for field in required_fields:
-        if not data.get(field):
-            return None, f"{field} is required"
-
-    # If no image, get one from Unsplash
-    if not data.get("image"):
-        data["image"] = fetch_unsplash_image(data.get("service"))
-
-    new_vendor = build_vendor(data, str(uuid.uuid4()))
-
-    vendors = read_data("vendors.json")
-    vendors.append(new_vendor)
-    write_data("vendors.json", vendors)
-
-    return new_vendor, None
-
-
-# Update existing vendor
-def update_vendor(vendor_id, data):
-    vendors = read_data("vendors.json")
-
-    vendor = None
-    for v in vendors:
-        if v.get("id") == vendor_id:
-            vendor = v
-            break
-
+def get_vendor_by_id(id):
+    vendor = Vendor.query.get(id)
     if not vendor:
-        return None
+        return jsonify({"error": "Vendor not found"}), 404
+    return jsonify(vendor.to_dict()), 200
 
-    # Update only the fields that were sent
+
+def create_vendor():
+    data = request.get_json()
+
+    if not data.get("name") or not data.get("category"):
+        return jsonify({"error": "Name and category are required"}), 400
+
+    new_vendor = Vendor(
+        name=data.get("name"),
+        category=data.get("category"),
+        location=data.get("location"),
+        price=data.get("price", 0),
+        image=data.get("image"),
+        description=data.get("description"),
+        rating=data.get("rating", 0),
+        user_id=data.get("user_id"),
+    )
+
+    db.session.add(new_vendor)
+    db.session.commit()
+
+    return jsonify(new_vendor.to_dict()), 201
+
+
+def update_vendor(id):
+    vendor = Vendor.query.get(id)
+    if not vendor:
+        return jsonify({"error": "Vendor not found"}), 404
+
+    data = request.get_json()
+
     if "name" in data:
-        vendor["name"] = data["name"]
-    if "service" in data:
-        vendor["service"] = data["service"]
-    if "price" in data:
-        vendor["price"] = data["price"]
+        vendor.name = data["name"]
+    if "category" in data:
+        vendor.category = data["category"]
     if "location" in data:
-        vendor["location"] = data["location"]
+        vendor.location = data["location"]
+    if "price" in data:
+        vendor.price = data["price"]
     if "image" in data:
-        vendor["image"] = data["image"]
+        vendor.image = data["image"]
     if "description" in data:
-        vendor["description"] = data["description"]
+        vendor.description = data["description"]
+    if "rating" in data:
+        vendor.rating = data["rating"]
 
-    write_data("vendors.json", vendors)
-    return vendor
+    db.session.commit()
+
+    return jsonify(vendor.to_dict()), 200
