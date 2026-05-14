@@ -1,5 +1,5 @@
 from flask import jsonify, request
-from app import db
+from extensions import db
 from models.vendor_model import Vendor
 
 
