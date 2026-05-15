@@ -1,37 +1,39 @@
+import os
+import requests
 from models.booking_model import Booking
 from models.user_model import User
 from models.vendor_model import Vendor
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-import os
 
-def send_email(to_email, subject, body):
-    """Send email using SMTP (configure with your email settings)"""
+def send_email(to_email, template_params):
+    """Send email using EmailJS REST API directly"""
+    
+    url = "https://api.emailjs.com/api/v1.0/email/send"
+    
+    payload = {
+        'service_id': os.getenv('EMAILJS_SERVICE_ID'),
+        'template_id': os.getenv('EMAILJS_TEMPLATE_ID'),
+        'user_id': os.getenv('EMAILJS_USER_ID'),
+        'accessToken': os.getenv('EMAILJS_ACCESS_TOKEN'),
+        'template_params': {
+            'email': to_email,
+            'customer_name': template_params.get('customer_name', 'Customer'),
+            'booking_date': template_params.get('booking_date', ''),
+            'booking_id': str(template_params.get('booking_id', '')),
+            'message': template_params.get('message', '')
+        }
+    }
+    
+    headers = {
+        'Content-Type': 'application/json'
+    }
+    
     try:
-        smtp_server = os.getenv('SMTP_SERVER', 'smtp.gmail.com')
-        smtp_port = int(os.getenv('SMTP_PORT', 587))
-        smtp_user = os.getenv('SMTP_USER')
-        smtp_password = os.getenv('SMTP_PASSWORD')
-        
-        if not smtp_user or not smtp_password:
-            print(f"Email not configured. Would have sent to {to_email}: {subject}")
-            return
-        
-        msg = MIMEMultipart()
-        msg['From'] = smtp_user
-        msg['To'] = to_email
-        msg['Subject'] = subject
-        msg.attach(MIMEText(body, 'plain'))
-        
-        server = smtplib.SMTP(smtp_server, smtp_port)
-        server.starttls()
-        server.login(smtp_user, smtp_password)
-        server.send_message(msg)
-        server.quit()
-        print(f"Email sent to {to_email}")
+        response = requests.post(url, json=payload, headers=headers)
+        print(f"Email API response: {response.status_code} - {response.text}")
+        return response.status_code == 200
     except Exception as e:
-        print(f"Failed to send email: {e}")
+        print(f"Email error: {e}")
+        return False
 
 def create_booking(data, current_user):
     """Create a new booking"""
@@ -43,15 +45,19 @@ def create_booking(data, current_user):
         'message': data.get('message', '')
     })
     
-    # Get vendor email
+    # Get vendor email and send notification
     vendor = Vendor.find_by_id(data['vendor_id'])
     if vendor:
         user = User.find_by_id(vendor['user_id'])
-        if user:
+        if user and user.get('email'):
             send_email(
                 to_email=user['email'],
-                subject='New Booking Request',
-                body=f"You have a new booking request from {current_user['name']} for {data['date']}."
+                template_params={
+                    'customer_name': current_user.get('name', 'Customer'),
+                    'booking_date': data['date'],
+                    'booking_id': booking.id,
+                    'message': data.get('message', 'No message')
+                }
             )
     
     return booking
@@ -70,13 +76,17 @@ def update_booking_status(booking_id, status, current_user):
     if not booking:
         return None
     
-    # Get user email
+    # Get user email and send notification
     user = User.find_by_id(booking['user_id'])
-    if user:
+    if user and user.get('email'):
         send_email(
             to_email=user['email'],
-            subject=f'Booking {status.capitalize()}',
-            body=f"Your booking has been {status}."
+            template_params={
+                'customer_name': user.get('name', 'Customer'),
+                'booking_date': booking['date'],
+                'booking_id': booking['id'],
+                'message': f"Your booking has been {status}"
+            }
         )
     
     return booking
