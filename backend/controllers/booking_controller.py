@@ -5,36 +5,38 @@ from models.booking_model import Booking, Event
 from models.vendor_model import Vendor
 from models.user_model import User
 import os
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import requests
 
-def send_email(to_email, subject, body):
-    """Send email using SMTP (configure with your email settings)"""
+def send_email(to_email, template_params):
+    """Send email using EmailJS REST API directly"""
+    
+    url = "https://api.emailjs.com/api/v1.0/email/send"
+    
+    payload = {
+        'service_id': os.getenv('EMAILJS_SERVICE_ID'),
+        'template_id': os.getenv('EMAILJS_TEMPLATE_ID'),
+        'user_id': os.getenv('EMAILJS_USER_ID'),
+        'accessToken': os.getenv('EMAILJS_ACCESS_TOKEN'),
+        'template_params': {
+            'email': to_email,
+            'customer_name': template_params.get('customer_name', 'Customer'),
+            'booking_date': template_params.get('booking_date', ''),
+            'booking_id': str(template_params.get('booking_id', '')),
+            'message': template_params.get('message', '')
+        }
+    }
+    
+    headers = {
+        'Content-Type': 'application/json'
+    }
+    
     try:
-        smtp_server = os.getenv('SMTP_SERVER', 'smtp.gmail.com')
-        smtp_port = int(os.getenv('SMTP_PORT', 587))
-        smtp_user = os.getenv('SMTP_USER')
-        smtp_password = os.getenv('SMTP_PASSWORD')
-        
-        if not smtp_user or not smtp_password:
-            print(f"Email not configured. Would have sent to {to_email}: {subject}")
-            return
-        
-        msg = MIMEMultipart()
-        msg['From'] = smtp_user
-        msg['To'] = to_email
-        msg['Subject'] = subject
-        msg.attach(MIMEText(body, 'plain'))
-        
-        server = smtplib.SMTP(smtp_server, smtp_port)
-        server.starttls()
-        server.login(smtp_user, smtp_password)
-        server.send_message(msg)
-        server.quit()
-        print(f"Email sent to {to_email}")
+        response = requests.post(url, json=payload, headers=headers)
+        print(f"Email API response: {response.status_code} - {response.text}")
+        return response.status_code == 200
     except Exception as e:
-        print(f"Failed to send email: {e}")
+        print(f"Email error: {e}")
+        return False
 
 def create_booking():
     identity = get_jwt_identity()
@@ -70,12 +72,17 @@ def create_booking():
     # Send email to vendor
     vendor = Vendor.query.get(vendor_id)
     if vendor and vendor.user_id:
-        user = User.query.get(vendor.user_id)
-        if user and user.email:
+        vendor_user = User.query.get(vendor.user_id)
+        booking_user = User.query.get(identity["id"])
+        if vendor_user and vendor_user.email:
             send_email(
-                to_email=user.email,
-                subject=f"New Booking Request #{booking.id}",
-                body=f"You have a new booking request for event ID {event_id}. Log in to your vendor dashboard to approve or reject."
+                to_email=vendor_user.email,
+                template_params={
+                    'customer_name': booking_user.name if booking_user else 'Customer',
+                    'booking_date': booking.created_at.isoformat() if booking.created_at else '',
+                    'booking_id': booking.id,
+                    'message': f"New booking request for event ID {event_id}."
+                }
             )
     
     return jsonify(booking.to_dict()), 201
@@ -120,11 +127,16 @@ def update_booking_status(booking_id):
     if user and user.email:
         send_email(
             to_email=user.email,
-            subject=f"Booking {status.capitalize()}",
-            body=f"Your booking #{booking.id} has been {status}."
+            template_params={
+                'customer_name': user.name,
+                'booking_date': booking.created_at.isoformat() if booking.created_at else '',
+                'booking_id': booking.id,
+                'message': f"Your booking #{booking.id} has been {status}."
+            }
         )
     
     return jsonify(booking.to_dict()), 200
+
 
 def create_event():
     identity = get_jwt_identity()
@@ -152,15 +164,19 @@ def create_event():
     db.session.commit()
     return jsonify(event.to_dict()), 201
 
+
 def get_my_events():
     identity = get_jwt_identity()
     events = Event.query.filter_by(user_id=identity["id"]).all()
     return jsonify([e.to_dict() for e in events]), 200
 
+
 def get_all_bookings():
     bookings = Booking.query.all()
     return jsonify([b.to_dict() for b in bookings]), 200
 
+
 def get_all_users():
     users = User.query.all()
     return jsonify([u.to_dict() for u in users]), 200
+
