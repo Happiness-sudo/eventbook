@@ -1,276 +1,241 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function EditVendorProfile() {
+  const navigate = useNavigate();
 
-  const [form, setForm] = useState({
-
-    businessName: "",
-
-    category: "",
-
+  const [formData, setFormData] = useState({
+    name: "",
+    service: "",
     location: "",
-
-    priceRange: "",
-
+    price: "",
     image: "",
-
     description: "",
-
   });
 
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-
-    setForm({
-
-      ...form,
-
+    setFormData({
+      ...formData,
       [e.target.name]: e.target.value,
-
     });
-
   };
 
   const handleSubmit = async (e) => {
-
     e.preventDefault();
 
     setLoading(true);
 
     try {
-
       const response = await fetch(
         "http://127.0.0.1:5000/vendors",
         {
-
           method: "POST",
-
           headers: {
             "Content-Type": "application/json",
           },
-
-          body: JSON.stringify(form),
-
+          body: JSON.stringify({
+            name: formData.name,
+            service: formData.service,
+            location: formData.location,
+            price: Number(formData.price),
+            image: formData.image,
+            description: formData.description,
+          }),
         }
       );
 
       const data = await response.json();
 
-      alert(data.message);
+      if (!response.ok) {
+        alert(data.error || "Something went wrong");
+        return;
+      }
+
+      alert("Vendor profile created successfully!");
+
+      setFormData({
+        name: "",
+        service: "",
+        location: "",
+        price: "",
+        image: "",
+        description: "",
+      });
+
+      navigate("/vendor/dashboard");
 
     } catch (error) {
-
-      alert("Server error");
-
+      console.error(error);
+      alert("Server error. Make sure backend is running.");
     } finally {
-
       setLoading(false);
-
     }
   };
 
   return (
-
     <div style={styles.page}>
-
       <div style={styles.card}>
-
         <h1 style={styles.title}>
           Create Vendor Profile
         </h1>
 
         <p style={styles.subtitle}>
-          Add your business details
+          Add your business details so event
+          organizers can find and book you.
         </p>
 
-        <form onSubmit={handleSubmit}>
-
+        <form
+          onSubmit={handleSubmit}
+          style={styles.form}
+        >
           <input
-            style={styles.input}
-            name="businessName"
+            type="text"
+            name="name"
             placeholder="Business Name"
-            value={form.businessName}
+            value={formData.name}
             onChange={handleChange}
             required
+            style={styles.input}
           />
 
           <input
-            style={styles.input}
-            name="category"
-            placeholder="Category"
-            value={form.category}
+            type="text"
+            name="service"
+            placeholder="Service Type (DJ, Catering, Photography...)"
+            value={formData.service}
             onChange={handleChange}
             required
+            style={styles.input}
           />
 
           <input
-            style={styles.input}
+            type="text"
             name="location"
             placeholder="Location"
-            value={form.location}
+            value={formData.location}
             onChange={handleChange}
             required
+            style={styles.input}
           />
 
           <input
-            style={styles.input}
-            name="priceRange"
-            placeholder="Price Range"
-            value={form.priceRange}
+            type="number"
+            name="price"
+            placeholder="Price in KSh"
+            value={formData.price}
             onChange={handleChange}
             required
+            style={styles.input}
           />
 
           <input
-            style={styles.input}
+            type="text"
             name="image"
             placeholder="Image URL"
-            value={form.image}
+            value={formData.image}
             onChange={handleChange}
+            required
+            style={styles.input}
           />
 
           <textarea
-            style={styles.textarea}
             name="description"
-            placeholder="Description"
-            value={form.description}
+            placeholder="Describe your services"
+            value={formData.description}
             onChange={handleChange}
             required
+            style={styles.textarea}
           />
 
           <button
+            type="submit"
             style={styles.button}
             disabled={loading}
           >
             {loading ? "Saving..." : "Save Profile"}
           </button>
-
         </form>
-
       </div>
-
     </div>
   );
 }
 
 const styles = {
-
   page: {
-
     minHeight: "100vh",
-
+    background: "var(--bg)",
     display: "flex",
-
     justifyContent: "center",
-
     alignItems: "center",
-
-    background: "#050014",
-
     padding: "40px 20px",
-
   },
 
   card: {
-
     width: "100%",
-
     maxWidth: "650px",
-
-    background: "rgba(255,255,255,0.03)",
-
-    border: "1px solid rgba(255,255,255,0.08)",
-
+    background: "var(--card-bg)",
+    border: "1px solid var(--border)",
     borderRadius: "24px",
-
-    padding: "40px",
-
+    padding: "32px",
+    boxShadow: "var(--shadow)",
   },
 
   title: {
-
-    fontSize: "42px",
-
+    fontSize: "32px",
+    fontWeight: "800",
     marginBottom: "10px",
-
-    fontWeight: "700",
-
+    color: "var(--text)",
   },
 
   subtitle: {
-
-    color: "#aaa",
-
+    fontSize: "14px",
+    color: "var(--muted)",
     marginBottom: "30px",
+    lineHeight: 1.6,
+  },
 
+  form: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "16px",
   },
 
   input: {
-
-    width: "100%",
-
-    padding: "16px",
-
-    marginBottom: "18px",
-
+    padding: "14px",
     borderRadius: "12px",
-
-    border: "1px solid rgba(255,255,255,0.1)",
-
-    background: "#0f001f",
-
-    color: "white",
-
-    fontSize: "15px",
-
+    border: "1px solid var(--border)",
+    background: "var(--input-bg)",
+    color: "var(--text)",
+    fontSize: "14px",
+    outline: "none",
   },
 
   textarea: {
-
-    width: "100%",
-
-    padding: "16px",
-
-    minHeight: "140px",
-
-    marginBottom: "18px",
-
+    padding: "14px",
     borderRadius: "12px",
-
-    border: "1px solid rgba(255,255,255,0.1)",
-
-    background: "#0f001f",
-
-    color: "white",
-
-    fontSize: "15px",
-
+    border: "1px solid var(--border)",
+    background: "var(--input-bg)",
+    color: "var(--text)",
+    minHeight: "140px",
+    fontSize: "14px",
+    outline: "none",
+    resize: "vertical",
   },
 
   button: {
-
-    width: "100%",
-
-    padding: "16px",
-
+    padding: "15px",
+    borderRadius: "100px",
     border: "none",
-
-    borderRadius: "999px",
-
     background:
-      "linear-gradient(90deg,#ff0080,#ff5e00)",
-
+      "linear-gradient(135deg,#FF3D9A,#FF6B35)",
     color: "white",
-
-    fontSize: "16px",
-
+    fontSize: "15px",
     fontWeight: "700",
-
     cursor: "pointer",
-
+    marginTop: "10px",
   },
-
 };
 
 export default EditVendorProfile;
