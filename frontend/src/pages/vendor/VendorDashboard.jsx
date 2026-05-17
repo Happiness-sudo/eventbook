@@ -13,7 +13,8 @@ const VendorDashboard = () => {
 
   const loadData = async () => {
     try {
-      const bookingsRes = await fetch("http://localhost:5000/bookings");
+      // Added /api to the fetch endpoint
+      const bookingsRes = await fetch("http://localhost:5000/api/bookings");
       const bookings = await bookingsRes.json();
 
       const total = bookings.length;
@@ -41,7 +42,8 @@ const VendorDashboard = () => {
 
   const handleAction = async (bookingId, newStatus) => {
     try {
-      await fetch(`http://localhost:5000/bookings/${bookingId}`, {
+      // Added /api to the PATCH endpoint
+      await fetch(`http://localhost:5000/api/bookings/${bookingId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),

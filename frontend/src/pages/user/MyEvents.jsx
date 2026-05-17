@@ -17,9 +17,9 @@ const MyEvents = () => {
       setError("");
       try {
         const res = await getMyEvents();
-        const userId = user?.id || 1;
-        const myEvents = res.data.filter((e) => e.userId === userId);
-        setEvents(myEvents);
+        
+        setEvents(res.data);
+        
       } catch (err) {
         setError("Could not load events. Please try again.");
       } finally {
@@ -74,7 +74,7 @@ const MyEvents = () => {
           {events.map((e) => (
             <div key={e.id} style={S.eventCard}>
               <div style={S.eventInfo}>
-                <h3 style={S.eventTitle}>{e.title}</h3>
+                <h3 style={S.eventTitle}>{e.name || e.title}</h3>
                 <div style={S.metaRow}>
                   <span style={S.meta}>{formatDate(e.date)}</span>
                   {e.location && (
