@@ -9,17 +9,16 @@ function VendorMarketplace() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/vendors")
-      .then((res) => res.json())
-      .then((data) => {
-        setVendors(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error(err);
-        setLoading(false);
-      });
-  }, []);
+  fetch('http://localhost:5000/vendors') 
+    .then((res) => {
+      if (!res.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return res.json();
+    })
+    .then((data) => setVendors(data))
+    .catch((err) => console.error("Error fetching vendors:", err));
+}, []);
 
   const handleViewVendor = (vendor) => {
     navigate(`/vendors/${vendor.id}`);
