@@ -165,36 +165,27 @@ def login():
 
     })
 
+
+# -------------------------
+# GET ALL VENDORS
+# -------------------------
 # -------------------------
 # CREATE VENDOR PROFILE
 # -------------------------
 @app.route("/vendors", methods=["POST"])
 def create_vendor():
-
     data = request.json
-
     new_vendor = Vendor(
-
         business_name=data["businessName"],
-
         category=data["category"],
-
         location=data["location"],
-
         price_range=data["priceRange"],
-
         image=data["image"],
-
         description=data["description"],
-
         user_id=data.get("userId")
-
     )
-
     db.session.add(new_vendor)
-
     db.session.commit()
-
     return jsonify({
         "message": "Vendor profile created successfully"
     }), 201
@@ -204,36 +195,44 @@ def create_vendor():
 # -------------------------
 @app.route("/vendors", methods=["GET"])
 def get_vendors():
-
     vendors = Vendor.query.all()
-
     vendor_list = []
-
     for vendor in vendors:
-
         vendor_list.append({
-
             "id": vendor.id,
-
+            "name": vendor.business_name,
             "business_name": vendor.business_name,
-
             "category": vendor.category,
-
             "location": vendor.location,
-
+            "price": vendor.price_range,
             "price_range": vendor.price_range,
-
             "image": vendor.image,
-
             "description": vendor.description
-
         })
-
     return jsonify(vendor_list)
+
+# -------------------------
+# GET SINGLE VENDOR BY ID
+# -------------------------
+@app.route("/vendors/<int:id>", methods=["GET"])
+def get_vendor_by_id(id):
+    vendor = Vendor.query.get(id)
+    if not vendor:
+        return jsonify({"error": "Vendor not found"}), 404
+    return jsonify({
+        "id": vendor.id,
+        "name": vendor.business_name,
+        "business_name": vendor.business_name,
+        "category": vendor.category,
+        "location": vendor.location,
+        "price": vendor.price_range,
+        "price_range": vendor.price_range,
+        "image": vendor.image,
+        "description": vendor.description,
+    }), 200
 
 # -------------------------
 # RUN SERVER
 # -------------------------
 if __name__ == "__main__":
-
     app.run(debug=True)
