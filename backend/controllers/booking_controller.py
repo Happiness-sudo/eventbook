@@ -6,10 +6,11 @@ from models.vendor_model import Vendor
 from models.user_model import User
 import os
 import requests
+import json
+
 
 def send_email(to_email, template_params):
     """Send email using EmailJS REST API directly"""
-    
     url = "https://api.emailjs.com/api/v1.0/email/send"
     
     payload = {
@@ -26,10 +27,7 @@ def send_email(to_email, template_params):
         }
     }
     
-    headers = {
-        'Content-Type': 'application/json'
-    }
-    
+    headers = {'Content-Type': 'application/json'}
     try:
         response = requests.post(url, json=payload, headers=headers)
         print(f"Email API response: {response.status_code} - {response.text}")
@@ -38,8 +36,10 @@ def send_email(to_email, template_params):
         print(f"Email error: {e}")
         return False
 
+
 def create_booking():
-    identity = get_jwt_identity()
+    identity_str = get_jwt_identity()
+    identity = json.loads(identity_str) if isinstance(identity_str, str) else identity_str
     data = request.get_json()
 
     vendor_id = data.get("vendor_id")
@@ -55,9 +55,7 @@ def create_booking():
     ).first()
 
     if existing:
-        return jsonify({
-            "error": "You already booked this vendor for this event"
-        }), 400
+        return jsonify({"error": "You already booked this vendor for this event"}), 400
 
     booking = Booking(
         user_id=identity["id"],
@@ -69,7 +67,6 @@ def create_booking():
     db.session.add(booking)
     db.session.commit()
     
-    # Send email to vendor
     vendor = Vendor.query.get(vendor_id)
     if vendor and vendor.user_id:
         vendor_user = User.query.get(vendor.user_id)
@@ -87,23 +84,27 @@ def create_booking():
     
     return jsonify(booking.to_dict()), 201
 
+
 def get_my_bookings():
-    identity = get_jwt_identity()
+    identity_str = get_jwt_identity()
+    identity = json.loads(identity_str) if isinstance(identity_str, str) else identity_str
     bookings = Booking.query.filter_by(user_id=identity["id"]).all()
     return jsonify([b.to_dict() for b in bookings]), 200
 
-def get_vendor_bookings():
-    identity = get_jwt_identity()
-    vendor = Vendor.query.filter_by(user_id=identity["id"]).first()
 
+def get_vendor_bookings():
+    identity_str = get_jwt_identity()
+    identity = json.loads(identity_str) if isinstance(identity_str, str) else identity_str
+    vendor = Vendor.query.filter_by(user_id=identity["id"]).first()
     if not vendor:
         return jsonify({"error": "Vendor profile not found"}), 404
-
     bookings = Booking.query.filter_by(vendor_id=vendor.id).all()
     return jsonify([b.to_dict() for b in bookings]), 200
 
+
 def update_booking_status(booking_id):
-    identity = get_jwt_identity()
+    identity_str = get_jwt_identity()
+    identity = json.loads(identity_str) if isinstance(identity_str, str) else identity_str
     vendor = Vendor.query.filter_by(user_id=identity["id"]).first()
     booking = Booking.query.get(booking_id)
 
@@ -122,7 +123,6 @@ def update_booking_status(booking_id):
     booking.status = status
     db.session.commit()
     
-    # Send email to user
     user = User.query.get(booking.user_id)
     if user and user.email:
         send_email(
@@ -139,7 +139,8 @@ def update_booking_status(booking_id):
 
 
 def create_event():
-    identity = get_jwt_identity()
+    identity_str = get_jwt_identity()
+    identity = json.loads(identity_str) if isinstance(identity_str, str) else identity_str
     data = request.get_json()
 
     name = data.get("name", "").strip()
@@ -147,9 +148,7 @@ def create_event():
     location = data.get("location", "").strip()
 
     if not name or not date or not location:
-        return jsonify({
-            "error": "Name, date and location are required"
-        }), 400
+        return jsonify({"error": "Name, date and location are required"}), 400
 
     event = Event(
         user_id=identity["id"],
@@ -166,7 +165,8 @@ def create_event():
 
 
 def get_my_events():
-    identity = get_jwt_identity()
+    identity_str = get_jwt_identity()
+    identity = json.loads(identity_str) if isinstance(identity_str, str) else identity_str
     events = Event.query.filter_by(user_id=identity["id"]).all()
     return jsonify([e.to_dict() for e in events]), 200
 
@@ -179,4 +179,3 @@ def get_all_bookings():
 def get_all_users():
     users = User.query.all()
     return jsonify([u.to_dict() for u in users]), 200
-

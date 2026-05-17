@@ -4,6 +4,7 @@ from extensions import db
 from models.user_model import User
 from models.vendor_model import Vendor
 import bcrypt
+import json
 
 
 def register():
@@ -43,10 +44,9 @@ def register():
         db.session.add(vendor)
         db.session.commit()
 
-    token = create_access_token(identity={
-        "id": user.id,
-        "role": user.role
-    })
+    # Identity MUST be a string, not a dict
+    identity = json.dumps({"id": user.id, "role": user.role})
+    token = create_access_token(identity=identity)
 
     return jsonify({
         "user": user.to_dict(),
@@ -76,10 +76,9 @@ def login():
     if not match:
         return jsonify({"error": "Invalid email or password"}), 401
 
-    token = create_access_token(identity={
-        "id": user.id,
-        "role": user.role
-    })
+    # Identity MUST be a string, not a dict
+    identity = json.dumps({"id": user.id, "role": user.role})
+    token = create_access_token(identity=identity)
 
     return jsonify({
         "user": user.to_dict(),
