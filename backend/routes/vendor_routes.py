@@ -16,10 +16,9 @@ def list_vendors():
     return get_all_vendors()
 
 
-@vendor_bp.route("/vendors/<int:id>", methods=["GET"])
-def one_vendor(id):
+@vendor_bp.route('/vendors/<string:id>', methods=['GET']) 
+def get_vendor(id):
     return get_vendor_by_id(id)
-
 
 @vendor_bp.route("/vendors", methods=["POST"])
 def new_vendor():

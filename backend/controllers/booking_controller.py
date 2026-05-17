@@ -143,7 +143,7 @@ def create_event():
     identity = json.loads(identity_str) if isinstance(identity_str, str) else identity_str
     data = request.get_json()
 
-    name = data.get("name", "").strip()
+    name = (data.get("name") or data.get("title") or "").strip()
     date = data.get("date", "").strip()
     location = data.get("location", "").strip()
 
