@@ -4,6 +4,7 @@ import { useTheme } from "../context/ThemeContext";
 export default function Home() {
   const { theme, toggleTheme } = useTheme();
 
+<<<<<<< HEAD
   return (
     <div style={S.container}>
 
@@ -22,6 +23,10 @@ export default function Home() {
         <h1 style={S.title}>EventBook 🎉</h1>
         <p style={S.text}>
           Welcome to EventBook — your all-in-one platform to find vendors,
+=======
+        <p style={styles.text}>
+          Welcome to EventBook, your all in one platform to find vendors,
+>>>>>>> 43d5cd707715c95c42d45441f2324d5023ed2708
           book services, and manage events easily.
         </p>
 
