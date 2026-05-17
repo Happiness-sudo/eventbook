@@ -9,7 +9,7 @@ function VendorMarketplace() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:5000/vendors")
+    fetch("http://localhost:5000/api/vendors")
       .then((res) => res.json())
       .then((data) => {
         setVendors(data);

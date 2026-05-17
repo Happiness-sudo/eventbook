@@ -16,7 +16,7 @@ const VendorProfile = () => {
   const [bookingStatus, setBookingStatus] = useState("");
 
   useEffect(() => {
-    fetch(`http://localhost:5000/vendors/${id}`)
+    fetch(`http://localhost:5000/api/vendors/${id}`)
       .then((r) => {
         if (!r.ok) throw new Error("not found");
         return r.json();
@@ -74,14 +74,14 @@ const VendorProfile = () => {
   if (error)
     return (
       <div style={S.page}>
-        <Link to="/vendors" style={S.backBtn}>← Back to Vendors</Link>
+        <Link to="/api/vendors" style={S.backBtn}>← Back to Vendors</Link>
         <div style={S.error}>{error}</div>
       </div>
     );
 
   return (
     <div style={S.page}>
-      <Link to="/vendors" style={S.backBtn}>← Back to Vendors</Link>
+      <Link to="/api/vendors" style={S.backBtn}>← Back to Vendors</Link>
 
       <div style={S.card}>
         {vendor.image && (

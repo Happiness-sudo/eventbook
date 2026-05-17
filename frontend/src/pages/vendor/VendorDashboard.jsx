@@ -22,7 +22,7 @@ const VendorDashboard = () => {
         .reduce((sum, b) => sum + (Number(b.amount) || 0), 0);
       const pending = bookings.filter((b) => b.status === "pending");
 
-      const vendorsRes = await fetch("http://localhost:5000/vendors");
+      const vendorsRes = await fetch("http://localhost:5000/api/vendors");
       const vendors = await vendorsRes.json();
       const avgRating =
         vendors.reduce((sum, v) => sum + (v.rating || 0), 0) /
@@ -65,8 +65,7 @@ const VendorDashboard = () => {
     <div style={S.page}>
       <div style={S.container}>
         <div style={S.header}>
-          <h1 style={S.title}>Welcome back, {user?.name || "Vendor"} 👋</h1>
-          <p style={S.sub}>Here's how your business is doing today</p>
+          <h1 style={S.title}>Welcome back, {user?.name || "Vendor"} </h1>
         </div>
 
         <div style={S.statsGrid}>
@@ -84,7 +83,7 @@ const VendorDashboard = () => {
           </div>
           <div style={S.statCard}>
             <div style={S.statLabel}>Rating</div>
-            <div style={S.statValue}>⭐ {stats.rating.toFixed(1)}</div>
+            <div style={S.statValue}> {stats.rating.toFixed(1)}</div>
             <div style={S.statHint}>Average customer rating</div>
           </div>
         </div>
