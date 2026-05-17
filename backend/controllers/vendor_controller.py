@@ -1,64 +1,113 @@
 from flask import jsonify, request
 from models.vendor_model import Vendor
+import json
+import os
+import uuid
+
+VENDORS_FILE = "data/vendors.json"
+
+
+def read_vendors():
+    if not os.path.exists(VENDORS_FILE):
+        return []
+
+    with open(VENDORS_FILE, "r") as file:
+        return json.load(file)
+
+
+def save_vendors(vendors):
+    with open(VENDORS_FILE, "w") as file:
+        json.dump(vendors, file, indent=2)
 
 
 def get_all_vendors():
-    vendors = Vendor.query.all()
-    return jsonify([v.to_dict() for v in vendors]), 200
+    vendors = read_vendors()
+    return jsonify(vendors), 200
 
 
 def get_vendor_by_id(id):
-    vendor = Vendor.query.get(id)
-    if not vendor:
-        return jsonify({"error": "Vendor not found"}), 404
-    return jsonify(vendor.to_dict()), 200
+    vendors = read_vendors()
+
+    for vendor in vendors:
+        if vendor["id"] == id:
+            return jsonify(vendor), 200
+
+    return jsonify({"error": "Vendor not found"}), 404
 
 
 def create_vendor():
     data = request.get_json()
 
-    if not data.get("name") or not data.get("category"):
-        return jsonify({"error": "Name and category are required"}), 400
+    if not data.get("name") or not data.get("service"):
+        return jsonify(
+            {"error": "Name and service are required"}
+        ), 400
+
+    vendors = read_vendors()
 
     new_vendor = Vendor(
+        id=str(uuid.uuid4()),
         name=data.get("name"),
-        category=data.get("category"),
+        service=data.get("service"),
         location=data.get("location"),
         price=data.get("price", 0),
         image=data.get("image"),
         description=data.get("description"),
-        rating=data.get("rating", 0),
-        user_id=data.get("user_id"),
+        rating=data.get("rating", 5),
     )
 
-    db.session.add(new_vendor)
-    db.session.commit()
+    vendors.append(new_vendor.to_dict())
+
+    save_vendors(vendors)
 
     return jsonify(new_vendor.to_dict()), 201
 
 
 def update_vendor(id):
-    vendor = Vendor.query.get(id)
-    if not vendor:
-        return jsonify({"error": "Vendor not found"}), 404
+    vendors = read_vendors()
 
-    data = request.get_json()
+    for vendor in vendors:
+        if vendor["id"] == id:
 
-    if "name" in data:
-        vendor.name = data["name"]
-    if "category" in data:
-        vendor.category = data["category"]
-    if "location" in data:
-        vendor.location = data["location"]
-    if "price" in data:
-        vendor.price = data["price"]
-    if "image" in data:
-        vendor.image = data["image"]
-    if "description" in data:
-        vendor.description = data["description"]
-    if "rating" in data:
-        vendor.rating = data["rating"]
+            data = request.get_json()
 
-    db.session.commit()
+            vendor["name"] = data.get(
+                "name",
+                vendor["name"]
+            )
 
-    return jsonify(vendor.to_dict()), 200
+            vendor["service"] = data.get(
+                "service",
+                vendor["service"]
+            )
+
+            vendor["location"] = data.get(
+                "location",
+                vendor["location"]
+            )
+
+            vendor["price"] = data.get(
+                "price",
+                vendor["price"]
+            )
+
+            vendor["image"] = data.get(
+                "image",
+                vendor["image"]
+            )
+
+            vendor["description"] = data.get(
+                "description",
+                vendor["description"]
+            )
+
+            vendor["rating"] = data.get(
+                "rating",
+                vendor["rating"]
+            )
+
+            save_vendors(vendors)
+
+            return jsonify(vendor), 200
+
+    return jsonify({"error": "Vendor not found"}), 404
