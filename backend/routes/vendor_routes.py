@@ -1,3 +1,4 @@
+
 from flask import Blueprint
 from controllers.vendor_controller import (
     get_all_vendors,
@@ -28,3 +29,4 @@ def new_vendor():
 @vendor_bp.route("/vendors/<int:id>", methods=["PUT"])
 def edit_vendor(id):
     return update_vendor(id)
+
