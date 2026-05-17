@@ -12,7 +12,6 @@ import Navbar from "./components/Navbar";
 import Home from "./pages/home";
 
 /* Auth */
-=======
 /* HOME */
 import Home from "./pages/home.jsx";
 
