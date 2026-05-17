@@ -1,65 +1,49 @@
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 function Navbar() {
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  const user =
-    JSON.parse(localStorage.getItem("user"));
-
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-
+    logout();
     navigate("/login");
   };
 
   return (
-    <nav style={styles.nav}>
-      <h1 style={styles.logo}>EventBook</h1>
+    <nav style={S.nav}>
+      <Link to="/" style={S.brand}>EventBook</Link>
 
-      <div style={styles.links}>
-        {/* ONLY SHOW AFTER LOGIN */}
-        {user && (
+      <div style={S.links}>
+        <Link to="/vendors" style={S.link}>Browse Vendors</Link>
+
+        {user?.role === "user" && (
           <>
-            <Link to="/vendors" style={styles.link}>
-              Browse Vendors
-            </Link>
-
-            {user.role === "vendor" && (
-              <Link
-                to="/vendor/dashboard"
-                style={styles.link}
-              >
-                Vendor Dashboard
-              </Link>
-            )}
+            <Link to="/create-event" style={S.link}>Create Event</Link>
+            <Link to="/my-events" style={S.link}>My Events</Link>
+            <Link to="/my-bookings" style={S.link}>My Bookings</Link>
           </>
+        )}
+
+        {user?.role === "vendor" && (
+          <Link to="/vendor/dashboard" style={S.link}>Vendor Dashboard</Link>
+        )}
+
+        {user?.role === "admin" && (
+          <Link to="/admin/dashboard" style={S.link}>Admin Dashboard</Link>
         )}
       </div>
 
-      <div style={styles.right}>
-        {user ? (
+      <div style={S.right}>
+        {!user ? (
           <>
-            <span style={styles.user}>
-              Hi, {user.name}
-            </span>
-
-            <button
-              onClick={handleLogout}
-              style={styles.logout}
-            >
-              Logout
-            </button>
+            <Link to="/login" style={S.linkBtn}>Login</Link>
+            <Link to="/register" style={S.primaryBtn}>Register</Link>
           </>
         ) : (
           <>
-            <Link to="/login" style={styles.link}>
-              Login
-            </Link>
-
-            <Link to="/register" style={styles.link}>
-              Register
-            </Link>
+            <span style={S.greeting}>Hi, {user.name || "User"}</span>
+            <button style={S.linkBtn} onClick={handleLogout}>Logout</button>
           </>
         )}
       </div>
@@ -67,51 +51,70 @@ function Navbar() {
   );
 }
 
-const styles = {
+const S = {
   nav: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: "20px 40px",
-    background: "#140021",
-    borderBottom: "1px solid #2d1b45",
+    padding: "16px 32px",
+    background: "var(--card-bg)",
+    borderBottom: "1px solid var(--border)",
+    fontFamily: "system-ui, sans-serif",
   },
-
-  logo: {
-    color: "#ff2e88",
-    fontSize: "32px",
-    fontWeight: "800",
+  brand: {
+    fontFamily: "var(--font-head)",
+    fontSize: "20px",
+    fontWeight: 800,
+    background: "linear-gradient(135deg,#FF3D9A,#FF6B35)",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+    textDecoration: "none",
   },
-
   links: {
     display: "flex",
-    gap: "20px",
+    gap: "24px",
+    alignItems: "center",
   },
-
+  link: {
+    color: "var(--text)",
+    textDecoration: "none",
+    fontSize: "14px",
+    fontWeight: 600,
+  },
   right: {
     display: "flex",
+    gap: "12px",
     alignItems: "center",
-    gap: "16px",
   },
-
-  link: {
-    color: "white",
-    textDecoration: "none",
-    fontWeight: "600",
-  },
-
-  user: {
-    color: "#ccc",
-  },
-
-  logout: {
-    padding: "10px 18px",
-    borderRadius: "10px",
-    border: "none",
-    background: "#ff2e88",
-    color: "white",
+  linkBtn: {
+    padding: "8px 16px",
+    borderRadius: "100px",
+    border: "1px solid var(--border)",
+    background: "transparent",
+    color: "var(--text)",
+    fontSize: "13px",
+    fontWeight: 600,
     cursor: "pointer",
-    fontWeight: "600",
+    fontFamily: "inherit",
+    textDecoration: "none",
+    display: "inline-block",
+  },
+  primaryBtn: {
+    padding: "8px 18px",
+    borderRadius: "100px",
+    border: "none",
+    background: "linear-gradient(135deg,#FF3D9A,#FF6B35)",
+    color: "#fff",
+    fontSize: "13px",
+    fontWeight: 700,
+    cursor: "pointer",
+    textDecoration: "none",
+    display: "inline-block",
+  },
+  greeting: {
+    fontSize: "13px",
+    color: "var(--muted)",
+    fontWeight: 600,
   },
 };
 
