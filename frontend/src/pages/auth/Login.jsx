@@ -1,213 +1,207 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { loginUser } from "../../services/api";
-import { useAuth } from "../../context/AuthContext";
-import { useTheme } from "../../context/ThemeContext";
 
-const Login = () => {
-  const { login }              = useAuth();
-  const { theme, toggleTheme } = useTheme();
-  const navigate               = useNavigate();
+function Login() {
+  const navigate = useNavigate();
 
-  const [form, setForm]       = useState({ email:"", password:"" });
-  const [error, setError]     = useState("");
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
+
     setLoading(true);
+    setError("");
 
     try {
-      const res = await loginUser(form);
-      login(res.data.user, res.data.token);
-      if (res.data.user.role === "vendor") navigate("/vendor/dashboard");
-      else if (res.data.user.role === "admin") navigate("/admin/dashboard");
-      else navigate("/vendors");
-    } catch (err) {
-      const savedUser = JSON.parse(localStorage.getItem("eb-user"));
-      if (savedUser && savedUser.email === form.email) {
-        login(savedUser, "fake-token");
-        if (savedUser.role === "vendor") navigate("/vendor/dashboard");
-        else if (savedUser.role === "admin") navigate("/admin/dashboard");
-        else navigate("/vendors");
-      } else {
-        setError("Invalid email or password.");
+      const users =
+        JSON.parse(localStorage.getItem("eventbook-users")) || [];
+
+      const foundUser = users.find(
+        (u) =>
+          u.email === form.email &&
+          u.password === form.password
+      );
+
+      if (!foundUser) {
+        setError("Invalid email or password");
+        setLoading(false);
+        return;
       }
-    } finally {
-      setLoading(false);
+
+      localStorage.setItem(
+        "eventbook-current-user",
+        JSON.stringify(foundUser)
+      );
+
+      if (foundUser.role === "vendor") {
+        navigate("/vendor/profile/edit");
+      } else if (foundUser.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/vendors");
+      }
+
+    } catch (err) {
+      setError("Login failed");
     }
+
+    setLoading(false);
   };
 
   return (
-    <div style={S.page}>
+    <div style={styles.page}>
+      <div style={styles.card}>
 
-      {/* Blobs */}
-      <div style={{...S.blob, width:300, height:300, background:"#7B2FBE", top:-60, right:-60}} />
-      <div style={{...S.blob, width:200, height:200, background:"#FF3D9A", bottom:60, left:40}} />
+        <h1 style={styles.logo}>EventBook</h1>
 
-      {/* Theme toggle */}
-      <button onClick={toggleTheme} style={S.themeBtn}>
-        {theme === "dark" ? "☀️" : "🌙"}
-      </button>
+        <h2 style={styles.title}>Welcome Back</h2>
 
-      <div style={S.card}>
-        <div style={S.logo}>EventBook</div>
-        <h1 style={S.title}>Welcome back 👋</h1>
-        <p style={S.sub}>Sign in to your EventBook account</p>
+        <p style={styles.subtitle}>
+          Login to continue
+        </p>
 
-        {error && <div style={S.error}>{error}</div>}
+        {error && (
+          <div style={styles.error}>
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
-          {[
-            { name:"email",    label:"Email Address", type:"email",    ph:"jane@example.com" },
-            { name:"password", label:"Password",      type:"password", ph:"Your password"    },
-          ].map((f) => (
-            <div key={f.name} style={S.field}>
-              <label style={S.label}>{f.label}</label>
-              <input
-                type={f.type} name={f.name} required
-                placeholder={f.ph}
-                value={form[f.name]}
-                onChange={(e) => setForm({...form, [e.target.name]: e.target.value})}
-                style={S.input}
-              />
-            </div>
-          ))}
 
-          <button type="submit" disabled={loading} style={S.btn}>
-            {loading ? "Signing in..." : "Sign In →"}
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={form.email}
+            onChange={handleChange}
+            style={styles.input}
+            required
+          />
+
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={form.password}
+            onChange={handleChange}
+            style={styles.input}
+            required
+          />
+
+          <button
+            type="submit"
+            style={styles.button}
+            disabled={loading}
+          >
+            {loading ? "Logging in..." : "Login"}
           </button>
+
         </form>
 
-        <p style={S.footer}>
-          Don't have an account?{" "}
-          <Link to="/register" style={S.footerLink}>Register</Link>
+        <p style={styles.footer}>
+          Don’t have an account?{" "}
+          <Link to="/register" style={styles.link}>
+            Register
+          </Link>
         </p>
+
       </div>
     </div>
   );
-};
+}
 
-const S = {
+const styles = {
   page: {
     minHeight: "100vh",
     display: "flex",
-    alignItems: "center",
     justifyContent: "center",
-    background: "var(--bg)",         
-    padding: "40px 20px",
-    position: "relative",
-    overflow: "hidden",
-  },
-  blob: {
-    position: "absolute",
-    borderRadius: "50%",
-    filter: "blur(70px)",
-    opacity: .18,
-    pointerEvents: "none",
-  },
-  themeBtn: {
-    position: "fixed",
-    top: "20px",
-    right: "20px",
-    fontSize: "18px",
-    background: "var(--card-bg)",     
-    border: "1px solid var(--border)",
-    borderRadius: "12px",
-    width: "40px",
-    height: "40px",
-    cursor: "pointer",
-    display: "flex",
     alignItems: "center",
-    justifyContent: "center",
-    zIndex: 10,
+    background:
+      "linear-gradient(to bottom right, #050014, #140028)",
+    padding: "20px",
   },
+
   card: {
-    position: "relative",
-    zIndex: 1,
-    background: "var(--card-bg)",    
-    border: "1px solid var(--border)",
-    padding: "40px",
-    borderRadius: "24px",
     width: "100%",
     maxWidth: "420px",
-    boxShadow: "var(--shadow)",
+    background: "rgba(255,255,255,0.06)",
+    padding: "40px",
+    borderRadius: "20px",
+    border: "1px solid rgba(255,255,255,0.1)",
+    backdropFilter: "blur(10px)",
   },
+
   logo: {
-    fontFamily: "var(--font-head)",
-    fontSize: "18px",
-    fontWeight: 800,
-    background: "linear-gradient(135deg,#FF3D9A,#FF6B35)",
-    WebkitBackgroundClip: "text",
-    WebkitTextFillColor: "transparent",
-    marginBottom: "20px",
+    color: "#ff1493",
+    marginBottom: "10px",
+    fontSize: "40px",
+    fontWeight: "bold",
   },
+
   title: {
-    fontFamily: "var(--font-head)",
-    fontSize: "26px",
-    fontWeight: 800,
-    color: "var(--text)",           
-    marginBottom: "4px",
+    fontSize: "28px",
+    marginBottom: "10px",
   },
-  sub: {
-    fontSize: "13px",
-    color: "var(--muted)",           
-    marginBottom: "24px",
+
+  subtitle: {
+    color: "#b4b4c7",
+    marginBottom: "25px",
   },
-  error: {
-    fontSize: "13px",
-    color: "#FF3D9A",
-    background: "rgba(255,61,154,.1)",
-    border: "1px solid rgba(255,61,154,.3)",
-    padding: "10px 14px",
-    borderRadius: "12px",
-    marginBottom: "16px",
-  },
-  field: { marginBottom: "16px" },
-  label: {
-    display: "block",
-    fontSize: "11px",
-    fontWeight: 600,
-    color: "var(--muted)",         
-    marginBottom: "6px",
-    letterSpacing: ".05em",
-    textTransform: "uppercase",
-  },
+
   input: {
     width: "100%",
-    padding: "12px 14px",
-    borderRadius: "12px",
-    border: "1.5px solid var(--border)",  
-    background: "var(--input-bg)",        
-    color: "var(--text)",                 
-    fontSize: "14px",
-    fontFamily: "inherit",
-    outline: "none",
-    boxSizing: "border-box",
+    padding: "14px",
+    marginBottom: "15px",
+    borderRadius: "10px",
+    border: "1px solid rgba(255,255,255,0.1)",
+    background: "rgba(255,255,255,0.05)",
+    color: "white",
+    fontSize: "15px",
   },
-  btn: {
+
+  button: {
     width: "100%",
     padding: "14px",
     border: "none",
-    borderRadius: "100px",
-    background: "linear-gradient(135deg,#FF3D9A,#FF6B35)",
-    color: "#fff",
-    fontFamily: "var(--font-head)",
-    fontWeight: 700,
-    fontSize: "14px",
-    letterSpacing: ".04em",
+    borderRadius: "10px",
+    background: "#ff1493",
+    color: "white",
+    fontSize: "16px",
     cursor: "pointer",
-    boxShadow: "0 6px 30px rgba(255,61,154,.35)",
-    marginTop: "6px",
+    fontWeight: "bold",
   },
+
   footer: {
-    fontSize: "12px",
-    color: "var(--muted)",        
-    textAlign: "center",
     marginTop: "20px",
+    textAlign: "center",
+    color: "#b4b4c7",
   },
-  footerLink: { color: "#FF3D9A", fontWeight: 600 },
+
+  link: {
+    color: "#ff1493",
+    textDecoration: "none",
+  },
+
+  error: {
+    background: "rgba(255,0,0,0.15)",
+    color: "#ff8080",
+    padding: "10px",
+    borderRadius: "8px",
+    marginBottom: "15px",
+  },
 };
 
 export default Login;

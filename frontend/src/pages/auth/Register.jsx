@@ -1,12 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { registerUser } from "../../services/api";
-import { useAuth } from "../../context/AuthContext";
-import { useTheme } from "../../context/ThemeContext";
 
-const Register = () => {
-  const { login } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+function Register() {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -19,261 +14,270 @@ const Register = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setError("");
+
     setLoading(true);
+    setError("");
 
     try {
-      // REAL API
-      const res = await registerUser(form);
-      const user = res.data.user;
+      const users =
+        JSON.parse(localStorage.getItem("eventbook-users")) || [];
 
-      login(user, res.data.token);
+      const existingUser = users.find(
+        (u) => u.email === form.email
+      );
 
-      if (user.role === "vendor") {
+      if (existingUser) {
+        setError("User already exists");
+        setLoading(false);
+        return;
+      }
+
+      const newUser = {
+        name: form.name,
+        email: form.email,
+        password: form.password,
+        role: form.role,
+      };
+
+      users.push(newUser);
+
+      localStorage.setItem(
+        "eventbook-users",
+        JSON.stringify(users)
+      );
+
+      localStorage.setItem(
+        "eventbook-current-user",
+        JSON.stringify(newUser)
+      );
+
+      if (newUser.role === "vendor") {
         navigate("/vendor/profile/edit");
-      } else if (user.role === "admin") {
+      } else if (newUser.role === "admin") {
         navigate("/admin");
       } else {
         navigate("/vendors");
       }
 
     } catch (err) {
-      // FALLBACK (no backend)
-      const fakeUser = {
-        name: form.name,
-        email: form.email,
-        role: form.role,
-      };
-
-      login(fakeUser, "fake-token");
-
-      if (fakeUser.role === "vendor") {
-        navigate("/vendor/profile/edit");
-      } else if (fakeUser.role === "admin") {
-        navigate("/admin");
-      } else {
-        navigate("/vendors");
-      }
-    } finally {
-      setLoading(false);
+      setError("Registration failed");
     }
+
+    setLoading(false);
   };
 
   return (
-    <div style={S.page}>
-      <div style={{ ...S.blob, width: 320, height: 320, background: "#4361EE", top: -80, right: -60 }} />
-      <div style={{ ...S.blob, width: 200, height: 200, background: "#FF3D9A", bottom: 80, right: 200 }} />
-      <div style={{ ...S.blob, width: 160, height: 160, background: "#06D6A0", bottom: -40, left: 80 }} />
+    <div style={styles.page}>
+      <div style={styles.card}>
 
-      <button onClick={toggleTheme} style={S.themeBtn}>
-        {theme === "dark" ? "☀️" : "🌙"}
-      </button>
+        <h1 style={styles.logo}>EventBook</h1>
 
-      <div style={S.card}>
-        <div style={S.logo}>EventBook</div>
-        <h1 style={S.title}>Create account 🎉</h1>
-        <p style={S.sub}>Join EventBook and start planning</p>
+        <h2 style={styles.title}>Create Account</h2>
 
-        {error && <div style={S.error}>{error}</div>}
+        <p style={styles.subtitle}>
+          Join EventBook today
+        </p>
 
-        <p style={S.roleLabel}>I am a</p>
+        {error && (
+          <div style={styles.error}>
+            {error}
+          </div>
+        )}
 
-        <div style={S.roleRow}>
-          {[
-            { val: "user", label: "Event Organizer" },
-            { val: "vendor", label: "Vendor / Provider" },
-          ].map((r) => (
-            <button
-              key={r.val}
-              type="button"
-              onClick={() => setForm({ ...form, role: r.val })}
-              style={{
-                ...S.roleBtn,
-                ...(form.role === r.val ? S.roleBtnActive : {}),
-              }}
-            >
-              {r.label}
-            </button>
-          ))}
+        <div style={styles.roleContainer}>
+
+          <button
+            type="button"
+            onClick={() =>
+              setForm({ ...form, role: "user" })
+            }
+            style={{
+              ...styles.roleButton,
+              background:
+                form.role === "user"
+                  ? "#ff1493"
+                  : "transparent",
+            }}
+          >
+            User
+          </button>
+
+          <button
+            type="button"
+            onClick={() =>
+              setForm({ ...form, role: "vendor" })
+            }
+            style={{
+              ...styles.roleButton,
+              background:
+                form.role === "vendor"
+                  ? "#ff1493"
+                  : "transparent",
+            }}
+          >
+            Vendor
+          </button>
+
         </div>
 
         <form onSubmit={handleSubmit}>
-          {[
-            { name: "name", label: "Full name", type: "text", ph: "Jane Mwangi" },
-            { name: "email", label: "Email address", type: "email", ph: "jane@example.com" },
-            { name: "password", label: "Password", type: "password", ph: "Min. 8 characters" },
-          ].map((f) => (
-            <div key={f.name} style={S.field}>
-              <label style={S.label}>{f.label}</label>
-              <input
-                name={f.name}
-                type={f.type}
-                placeholder={f.ph}
-                required
-                value={form[f.name]}
-                onChange={(e) =>
-                  setForm({ ...form, [e.target.name]: e.target.value })
-                }
-                style={S.input}
-              />
-            </div>
-          ))}
 
-          <button type="submit" disabled={loading} style={S.btn}>
-            {loading ? "Creating account..." : "Create Account →"}
+          <input
+            type="text"
+            name="name"
+            placeholder="Full Name"
+            value={form.name}
+            onChange={handleChange}
+            style={styles.input}
+            required
+          />
+
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={form.email}
+            onChange={handleChange}
+            style={styles.input}
+            required
+          />
+
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={form.password}
+            onChange={handleChange}
+            style={styles.input}
+            required
+          />
+
+          <button
+            type="submit"
+            style={styles.button}
+            disabled={loading}
+          >
+            {loading
+              ? "Creating account..."
+              : "Register"}
           </button>
+
         </form>
 
-        <p style={S.footer}>
+        <p style={styles.footer}>
           Already have an account?{" "}
-          <Link to="/login" style={S.footerLink}>
-            Sign in
+          <Link to="/login" style={styles.link}>
+            Login
           </Link>
         </p>
+
       </div>
     </div>
   );
-};
+}
 
-const S = {
+const styles = {
   page: {
     minHeight: "100vh",
     display: "flex",
-    alignItems: "center",
     justifyContent: "center",
-    background: "var(--bg)",
-    position: "relative",
-    overflow: "hidden",
-    padding: "40px 20px",
-  },
-  blob: {
-    position: "absolute",
-    borderRadius: "50%",
-    filter: "blur(70px)",
-    opacity: 0.18,
-    pointerEvents: "none",
-  },
-  themeBtn: {
-    position: "fixed",
-    top: "20px",
-    right: "20px",
-    fontSize: "18px",
-    background: "var(--card-bg)",
-    border: "1px solid var(--border)",
-    borderRadius: "12px",
-    width: "40px",
-    height: "40px",
-    cursor: "pointer",
-    display: "flex",
     alignItems: "center",
-    justifyContent: "center",
-    zIndex: 10,
+    background:
+      "linear-gradient(to bottom right, #050014, #140028)",
+    padding: "20px",
   },
+
   card: {
-    position: "relative",
-    zIndex: 1,
-    background: "var(--card-bg)",
-    border: "1px solid var(--border)",
-    borderRadius: "24px",
-    padding: "40px",
     width: "100%",
-    maxWidth: "420px",
-    boxShadow: "var(--shadow)",
+    maxWidth: "450px",
+    background: "rgba(255,255,255,0.06)",
+    padding: "40px",
+    borderRadius: "20px",
+    border: "1px solid rgba(255,255,255,0.1)",
+    backdropFilter: "blur(10px)",
   },
+
   logo: {
-    fontFamily: "var(--font-head)",
-    fontSize: "18px",
-    fontWeight: 800,
-    background: "linear-gradient(135deg,#FF3D9A,#FF6B35)",
-    WebkitBackgroundClip: "text",
-    WebkitTextFillColor: "transparent",
-    marginBottom: "20px",
+    color: "#ff1493",
+    marginBottom: "10px",
+    fontSize: "40px",
+    fontWeight: "bold",
   },
+
   title: {
-    fontFamily: "var(--font-head)",
-    fontSize: "26px",
-    fontWeight: 800,
-    color: "var(--text)",
-    marginBottom: "4px",
+    fontSize: "28px",
+    marginBottom: "10px",
   },
-  sub: {
-    fontSize: "13px",
-    color: "var(--muted)",
-    marginBottom: "24px",
+
+  subtitle: {
+    color: "#b4b4c7",
+    marginBottom: "25px",
   },
-  error: {
-    fontSize: "13px",
-    color: "#FF3D9A",
-    background: "rgba(255,61,154,.1)",
-    border: "1px solid rgba(255,61,154,.3)",
-    padding: "10px 14px",
-    borderRadius: "12px",
-    marginBottom: "16px",
-  },
-  roleLabel: {
-    fontSize: "11px",
-    fontWeight: 600,
-    color: "var(--muted)",
-    marginBottom: "8px",
-    textTransform: "uppercase",
-  },
-  roleRow: {
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap: "8px",
+
+  roleContainer: {
+    display: "flex",
+    gap: "10px",
     marginBottom: "20px",
   },
-  roleBtn: {
+
+  roleButton: {
+    flex: 1,
     padding: "12px",
-    borderRadius: "14px",
-    border: "1px solid var(--border)",
-    background: "transparent",
-    color: "var(--muted)",
+    borderRadius: "10px",
+    border: "1px solid rgba(255,255,255,0.1)",
+    color: "white",
     cursor: "pointer",
   },
-  roleBtnActive: {
-    background: "rgba(255,61,154,.15)",
-    borderColor: "#FF3D9A",
-    color: "var(--text)",
-  },
-  field: { marginBottom: "16px" },
-  label: {
-    display: "block",
-    fontSize: "11px",
-    fontWeight: 600,
-    color: "var(--muted)",
-    marginBottom: "6px",
-    textTransform: "uppercase",
-  },
+
   input: {
     width: "100%",
-    padding: "12px 14px",
-    borderRadius: "12px",
-    border: "1px solid var(--border)",
-    background: "var(--input-bg)",
-    color: "var(--text)",
+    padding: "14px",
+    marginBottom: "15px",
+    borderRadius: "10px",
+    border: "1px solid rgba(255,255,255,0.1)",
+    background: "rgba(255,255,255,0.05)",
+    color: "white",
+    fontSize: "15px",
   },
-  btn: {
+
+  button: {
     width: "100%",
     padding: "14px",
-    borderRadius: "100px",
     border: "none",
-    background: "linear-gradient(135deg,#FF3D9A,#FF6B35)",
-    color: "#fff",
-    fontWeight: 700,
+    borderRadius: "10px",
+    background: "#ff1493",
+    color: "white",
+    fontSize: "16px",
     cursor: "pointer",
+    fontWeight: "bold",
   },
+
   footer: {
-    fontSize: "12px",
-    color: "var(--muted)",
-    textAlign: "center",
     marginTop: "20px",
+    textAlign: "center",
+    color: "#b4b4c7",
   },
-  footerLink: {
-    color: "#FF3D9A",
-    fontWeight: 600,
+
+  link: {
+    color: "#ff1493",
+    textDecoration: "none",
+  },
+
+  error: {
+    background: "rgba(255,0,0,0.15)",
+    color: "#ff8080",
+    padding: "10px",
+    borderRadius: "8px",
+    marginBottom: "15px",
   },
 };
 
