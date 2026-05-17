@@ -4,7 +4,6 @@ import { useTheme } from "../context/ThemeContext";
 export default function Home() {
   const { theme, toggleTheme } = useTheme();
 
-<<<<<<< HEAD
   return (
     <div style={S.container}>
 
@@ -20,13 +19,9 @@ export default function Home() {
 
       <div style={S.card}>
         <div style={S.logo}>EventBook</div>
-        <h1 style={S.title}>EventBook 🎉</h1>
+        <h1 style={S.title}>EventBook </h1>
         <p style={S.text}>
           Welcome to EventBook — your all-in-one platform to find vendors,
-=======
-        <p style={styles.text}>
-          Welcome to EventBook, your all in one platform to find vendors,
->>>>>>> 43d5cd707715c95c42d45441f2324d5023ed2708
           book services, and manage events easily.
         </p>
 
@@ -59,8 +54,8 @@ const S = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    background: "var(--bg)",              
-    color: "var(--text)",                 
+    background: "var(--bg)",
+    color: "var(--text)",
     position: "relative",
     overflow: "hidden",
     padding: "40px 20px",
@@ -77,7 +72,7 @@ const S = {
     top: "20px",
     right: "20px",
     fontSize: "18px",
-    background: "var(--card-bg)",        
+    background: "var(--card-bg)",
     border: "1px solid var(--border)",
     borderRadius: "12px",
     width: "40px",
@@ -95,7 +90,7 @@ const S = {
     maxWidth: "440px",
     padding: "40px",
     borderRadius: "24px",
-    background: "var(--card-bg)",       
+    background: "var(--card-bg)",
     border: "1px solid var(--border)",
     textAlign: "center",
     boxShadow: "var(--shadow)",
@@ -113,12 +108,12 @@ const S = {
     fontFamily: "var(--font-head)",
     fontSize: "32px",
     fontWeight: 800,
-    color: "var(--text)",                
+    color: "var(--text)",
     marginBottom: "14px",
   },
   text: {
     fontSize: "13px",
-    color: "var(--muted)",              
+    color: "var(--muted)",
     marginBottom: "28px",
     lineHeight: 1.7,
   },
@@ -130,9 +125,9 @@ const S = {
   },
   login: {
     padding: "11px 28px",
-    border: "1.5px solid var(--border2)", 
+    border: "1.5px solid var(--border2)",
     borderRadius: "100px",
-    color: "var(--text)",                
+    color: "var(--text)",
     textDecoration: "none",
     fontFamily: "var(--font-head)",
     fontSize: "13px",
@@ -166,11 +161,11 @@ const S = {
     fontFamily: "var(--font-head)",
     fontSize: "20px",
     fontWeight: 800,
-    color: "var(--text)",               
+    color: "var(--text)",
   },
   statLabel: {
     fontSize: "10px",
-    color: "var(--muted)",              
+    color: "var(--muted)",
     letterSpacing: ".05em",
     textTransform: "uppercase",
   },
