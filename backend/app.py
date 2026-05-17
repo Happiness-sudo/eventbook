@@ -1,238 +1,45 @@
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify
 from flask_cors import CORS
-from flask_sqlalchemy import SQLAlchemy
+from extensions import db, jwt
+from routes.auth_routes import auth_bp
+from routes.booking_routes import bookings_bp
+from routes.vendor_routes import vendor_bp
+import os
 
 app = Flask(__name__)
-CORS(app)
 
-# -------------------------
-# DATABASE CONFIG
-# -------------------------
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///eventbook.db"
-
+# Configuration
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///eventbook.db")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "super-secret-key-change-in-production")
 
-db = SQLAlchemy(app)
+# Initialize extensions
+db.init_app(app)
+jwt.init_app(app)
 
-# -------------------------
-# USER MODEL
-# -------------------------
-class User(db.Model):
+# Enable CORS
+CORS(app, origins=["http://localhost:5173", "http://127.0.0.1:5173"])
 
-    id = db.Column(db.Integer, primary_key=True)
+# Register blueprints
+app.register_blueprint(auth_bp, url_prefix="/auth")
+app.register_blueprint(bookings_bp, url_prefix="/api")
+app.register_blueprint(vendor_bp, url_prefix="/api")
 
-    name = db.Column(db.String(120), nullable=False)
+# Import models to register them with SQLAlchemy
+from models.user_model import User
+from models.vendor_model import Vendor
+from models.booking_model import Booking, Event
 
-    email = db.Column(
-        db.String(120),
-        unique=True,
-        nullable=False
-    )
-
-    password = db.Column(
-        db.String(120),
-        nullable=False
-    )
-
-    role = db.Column(
-        db.String(20),
-        default="user"
-    )
-
-# -------------------------
-# VENDOR MODEL
-# -------------------------
-class Vendor(db.Model):
-
-    id = db.Column(db.Integer, primary_key=True)
-
-    business_name = db.Column(
-        db.String(120),
-        nullable=False
-    )
-
-    category = db.Column(
-        db.String(120),
-        nullable=False
-    )
-
-    location = db.Column(
-        db.String(120),
-        nullable=False
-    )
-
-    price_range = db.Column(
-        db.String(120),
-        nullable=False
-    )
-
-    image = db.Column(db.Text)
-
-    description = db.Column(db.Text)
-
-    user_id = db.Column(
-        db.Integer,
-        db.ForeignKey("user.id")
-    )
-
-# -------------------------
-# CREATE DATABASE
-# -------------------------
-with app.app_context():
-    db.create_all()
-
-# -------------------------
-# HOME
-# -------------------------
+# Home route
 @app.route("/")
 def home():
+    return jsonify({"message": "EventBook API running", "status": "ok"}), 200
 
-    return jsonify({
-        "message": "EventBook API running"
-    })
+# Create tables on startup
+with app.app_context():
+    db.create_all()
+    print("Database tables created/verified")
 
-# -------------------------
-# REGISTER
-# -------------------------
-@app.route("/auth/register", methods=["POST"])
-def register():
-
-    data = request.json
-
-    existing_user = User.query.filter_by(
-        email=data["email"]
-    ).first()
-
-    if existing_user:
-
-        return jsonify({
-            "message": "Email already exists"
-        }), 400
-
-    new_user = User(
-        name=data["name"],
-        email=data["email"],
-        password=data["password"],
-        role=data.get("role", "user")
-    )
-
-    db.session.add(new_user)
-
-    db.session.commit()
-
-    return jsonify({
-
-        "user": {
-            "id": new_user.id,
-            "name": new_user.name,
-            "email": new_user.email,
-            "role": new_user.role
-        },
-
-        "token": "fake-jwt-token"
-
-    }), 201
-
-# -------------------------
-# LOGIN
-# -------------------------
-@app.route("/auth/login", methods=["POST"])
-def login():
-
-    data = request.json
-
-    user = User.query.filter_by(
-        email=data["email"],
-        password=data["password"]
-    ).first()
-
-    if not user:
-
-        return jsonify({
-            "message": "Invalid credentials"
-        }), 401
-
-    return jsonify({
-
-        "user": {
-            "id": user.id,
-            "name": user.name,
-            "email": user.email,
-            "role": user.role
-        },
-
-        "token": "fake-jwt-token"
-
-    })
-
-
-# -------------------------
-# GET ALL VENDORS
-# -------------------------
-# -------------------------
-# CREATE VENDOR PROFILE
-# -------------------------
-@app.route("/vendors", methods=["POST"])
-def create_vendor():
-    data = request.json
-    new_vendor = Vendor(
-        business_name=data["businessName"],
-        category=data["category"],
-        location=data["location"],
-        price_range=data["priceRange"],
-        image=data["image"],
-        description=data["description"],
-        user_id=data.get("userId")
-    )
-    db.session.add(new_vendor)
-    db.session.commit()
-    return jsonify({
-        "message": "Vendor profile created successfully"
-    }), 201
-
-# -------------------------
-# GET ALL VENDORS
-# -------------------------
-@app.route("/vendors", methods=["GET"])
-def get_vendors():
-    vendors = Vendor.query.all()
-    vendor_list = []
-    for vendor in vendors:
-        vendor_list.append({
-            "id": vendor.id,
-            "name": vendor.business_name,
-            "business_name": vendor.business_name,
-            "category": vendor.category,
-            "location": vendor.location,
-            "price": vendor.price_range,
-            "price_range": vendor.price_range,
-            "image": vendor.image,
-            "description": vendor.description
-        })
-    return jsonify(vendor_list)
-
-# -------------------------
-# GET SINGLE VENDOR BY ID
-# -------------------------
-@app.route("/vendors/<int:id>", methods=["GET"])
-def get_vendor_by_id(id):
-    vendor = Vendor.query.get(id)
-    if not vendor:
-        return jsonify({"error": "Vendor not found"}), 404
-    return jsonify({
-        "id": vendor.id,
-        "name": vendor.business_name,
-        "business_name": vendor.business_name,
-        "category": vendor.category,
-        "location": vendor.location,
-        "price": vendor.price_range,
-        "price_range": vendor.price_range,
-        "image": vendor.image,
-        "description": vendor.description,
-    }), 200
-
-# -------------------------
-# RUN SERVER
-# -------------------------
 if __name__ == "__main__":
+
     app.run(debug=True)

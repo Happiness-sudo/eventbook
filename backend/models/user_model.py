@@ -1,7 +1,6 @@
 from extensions import db
 from datetime import datetime
 
-
 class User(db.Model):
     __tablename__ = "users"
 
@@ -12,9 +11,10 @@ class User(db.Model):
     role = db.Column(db.String(20), default="user")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    vendor = db.relationship("Vendor", backref="user", uselist=False)
-    events = db.relationship("Event", backref="user", lazy=True)
-    bookings = db.relationship("Booking", backref="user", lazy=True)
+    # Relationships
+    vendor = db.relationship("Vendor", back_populates="user", uselist=False)
+    events = db.relationship("Event", back_populates="user")
+    bookings = db.relationship("Booking", back_populates="user")
 
     def to_dict(self):
         return {

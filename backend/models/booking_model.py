@@ -3,19 +3,19 @@ from datetime import datetime
 
 class Booking(db.Model):
     __tablename__ = 'bookings'
-    
+
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     vendor_id = db.Column(db.Integer, db.ForeignKey('vendors.id'), nullable=False)
-    event_id = db.Column(db.Integer, db.ForeignKey('events.id'), nullable=True)
+    event_id = db.Column(db.Integer, nullable=True)  # No foreign key to Event
     status = db.Column(db.String(20), default='pending')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
-    user = db.relationship('User', backref='bookings')
-    vendor = db.relationship('Vendor', backref='bookings')
-    event = db.relationship('Event', backref='bookings')
-    
+
+    # Relationships - no back_populates to Event
+    user = db.relationship('User', back_populates='bookings')
+    vendor = db.relationship('Vendor', back_populates='bookings')
+
     def to_dict(self):
         return {
             'id': self.id,
@@ -29,7 +29,7 @@ class Booking(db.Model):
 
 class Event(db.Model):
     __tablename__ = 'events'
-    
+
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     name = db.Column(db.String(200), nullable=False)
@@ -37,9 +37,9 @@ class Event(db.Model):
     location = db.Column(db.String(200), nullable=False)
     budget = db.Column(db.Float, default=0)
     description = db.Column(db.Text, default='')
-    
-    user = db.relationship('User', backref='events')
-    
+
+    user = db.relationship('User', back_populates='events')
+
     def to_dict(self):
         return {
             'id': self.id,
