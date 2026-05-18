@@ -55,7 +55,7 @@ const VendorProfile = () => {
 
       if (!res.ok) throw new Error("Failed");
 
-      setBookingStatus("✅ Booking sent! The vendor will review it.");
+      setBookingStatus(" Booking sent! The vendor will review it.");
       setShowForm(false);
       setBookingDate("");
       setMessage("");

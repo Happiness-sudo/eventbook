@@ -4,21 +4,20 @@ import VendorCard from "../../components/VendorCard";
 
 function VendorMarketplace() {
   const navigate = useNavigate();
-
   const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/vendors")
-      .then((res) => res.json())
-      .then((data) => {
-        setVendors(data);
-        setLoading(false);
+    fetch('http://localhost:5000/api/vendors')
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return res.json();
       })
-      .catch((err) => {
-        console.error(err);
-        setLoading(false);
-      });
+      .then((data) => setVendors(data))
+      .catch((err) => console.error("Error fetching vendors:", err))
+      .finally(() => setLoading(false));
   }, []);
 
   const handleViewVendor = (vendor) => {
@@ -28,7 +27,6 @@ function VendorMarketplace() {
   return (
     <div style={styles.container}>
       <h1 style={styles.title}>Available Vendors</h1>
-
       {loading ? (
         <p style={styles.empty}>Loading vendors...</p>
       ) : vendors.length === 0 ? (
@@ -57,19 +55,16 @@ const styles = {
     minHeight: "100vh",
     background: "var(--bg)",
   },
-
   title: {
     fontSize: "32px",
     marginBottom: "30px",
     color: "var(--text)",
   },
-
   grid: {
     display: "flex",
     flexWrap: "wrap",
     gap: "24px",
   },
-
   empty: {
     color: "#aaa",
     marginTop: "20px",
