@@ -1,107 +1,186 @@
 from flask import jsonify, request
+from flask_jwt_extended import get_jwt_identity
+from extensions import db
 from models.vendor_model import Vendor
 import json
-import os
-import uuid
-
-VENDORS_FILE = "data/vendors.json"
 
 
-def read_vendors():
-    """Safely reads vendors from the local JSON file."""
-    if not os.path.exists(VENDORS_FILE):
-        return []
-    try:
-        with open(VENDORS_FILE, "r") as file:
-            return json.load(file)
-    except Exception:
-        return []
-
-
-def save_vendors(vendors):
-    """Saves vendors back to the local JSON file."""
-    os.makedirs(os.path.dirname(VENDORS_FILE), exist_ok=True)
-    with open(VENDORS_FILE, "w") as file:
-        json.dump(vendors, file, indent=2)
-
-
+# GET ALL VENDORS
 def get_all_vendors():
-    """Gets all vendors from JSON file first, falls back to Database."""
-    vendors = read_vendors()
-    
-    # If JSON file is empty, try loading records from the SQL database
-    if not vendors:
-        try:
-            db_vendors = Vendor.query.all()
-            vendors = [v.to_dict() for v in db_vendors]
-        except Exception as e:
-            print(f"Database fetch failed: {e}")
-            
-    return jsonify(vendors), 200
-
-
-def get_vendor_by_id(id):
-    """Finds a vendor matching the ID from either JSON or Database."""
-    # 1. Look inside the JSON file records
-    vendors = read_vendors()
-    for v in vendors:
-        if str(v.get("id")).strip() == str(id).strip():
-            return jsonify(v), 200
-
-    # 2. Look inside the SQL Database tables
     try:
-        db_vendor = Vendor.query.get(id)
-        if db_vendor:
-            return jsonify(db_vendor.to_dict()), 200
+        vendors = Vendor.query.all()
+
+        result = []
+        for v in vendors:
+            result.append({
+                "id": v.id,
+                "businessName": v.name,
+                "category": v.category,
+                "location": v.location,
+                "priceRange": float(v.price) if v.price else 0,
+                "image": v.image if v.image else "https://via.placeholder.com/300",
+                "description": v.description,
+                "rating": v.rating
+            })
+
+        return jsonify(result), 200
+
     except Exception as e:
-        print(f"Database fallback lookup failed: {e}")
-
-    # 3. If it can't be found anywhere
-    return jsonify({"error": "Vendor not found"}), 404
+        return jsonify({"error": str(e)}), 500
 
 
+# GET ONE VENDOR BY ID
+def get_vendor_by_id(id):
+    try:
+        vendor = db.session.get(Vendor, id)
+
+        if not vendor:
+            return jsonify({"error": "Vendor not found"}), 404
+
+        return jsonify({
+            "id": vendor.id,
+            "businessName": vendor.name,
+            "category": vendor.category,
+            "location": vendor.location,
+            "priceRange": float(vendor.price) if vendor.price else 0,
+            "image": vendor.image if vendor.image else "https://via.placeholder.com/300",
+            "description": vendor.description,
+            "rating": vendor.rating
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# CREATE VENDOR
 def create_vendor():
-    """Creates a new vendor and appends it to the dataset."""
-    data = request.get_json()
+    try:
+        data = request.get_json()
 
-    if not data.get("name") or not data.get("service"):
-        return jsonify({"error": "Name and service are required"}), 400
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
 
-    vendors = read_vendors()
+        if not data.get("name") or not data.get("category"):
+            return jsonify({"error": "Name and category are required"}), 400
 
-    new_vendor = Vendor(
-        id=str(uuid.uuid4()),
-        name=data.get("name"),
-        category=data.get("service"),  
-        location=data.get("location"),
-        price=data.get("price", 0),
-        image=data.get("image"),
-        description=data.get("description"),
-        rating=data.get("rating", 5),
-    )
+        new_vendor = Vendor(
+            user_id=data.get("user_id"),
+            name=data.get("name"),
+            category=data.get("category"),
+            location=data.get("location"),
+            price=data.get("price", 0),
+            image=data.get("image"),
+            description=data.get("description")
+        )
 
-    vendors.append(new_vendor.to_dict())
-    save_vendors(vendors)
+        db.session.add(new_vendor)
+        db.session.commit()
 
-    return jsonify(new_vendor.to_dict()), 201
+        return jsonify(new_vendor.to_dict()), 201
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
 
 
+# UPDATE VENDOR BY ID
 def update_vendor(id):
-    """Updates a vendor profile matching the ID."""
-    vendors = read_vendors()
+    try:
+        vendor = db.session.get(Vendor, id)
 
-    for vendor in vendors:
-        if str(vendor.get("id")) == str(id):
-            data = request.get_json()
-            vendor["name"] = data.get("name", vendor.get("name"))
-            vendor["service"] = data.get("service", vendor.get("service"))
-            vendor["location"] = data.get("location", vendor.get("location"))
-            vendor["price"] = data.get("price", vendor.get("price"))
-            vendor["image"] = data.get("image", vendor.get("image"))
-            vendor["description"] = data.get("description", vendor.get("description"))
-            vendor["rating"] = data.get("rating", vendor.get("rating"))
+        if not vendor:
+            return jsonify({"error": "Vendor not found"}), 404
 
-            save_vendors(vendors)
-            return jsonify(vendor), 200
+        data = request.get_json()
 
-    return jsonify({"error": "Vendor not found"}), 404
+        vendor.name = data.get("name", vendor.name)
+        vendor.category = data.get("category", vendor.category)
+        vendor.location = data.get("location", vendor.location)
+        vendor.price = data.get("price", vendor.price)
+        vendor.image = data.get("image", vendor.image)
+        vendor.description = data.get("description", vendor.description)
+
+        db.session.commit()
+
+        return jsonify(vendor.to_dict()), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+
+# DELETE VENDOR
+def delete_vendor(id):
+    try:
+        vendor = db.session.get(Vendor, id)
+
+        if not vendor:
+            return jsonify({"error": "Vendor not found"}), 404
+
+        db.session.delete(vendor)
+        db.session.commit()
+
+        return jsonify({"message": "Vendor deleted successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+
+# GET MY VENDOR PROFILE (logged-in user)
+def get_my_vendor_profile():
+    try:
+        identity_str = get_jwt_identity()
+        identity = json.loads(identity_str) if isinstance(identity_str, str) else identity_str
+
+        vendor = Vendor.query.filter_by(user_id=identity["id"]).first()
+
+        if not vendor:
+            return jsonify({"error": "Vendor profile not found"}), 404
+
+        return jsonify(vendor.to_dict()), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# UPDATE MY VENDOR PROFILE (logged-in user)
+def update_my_vendor_profile():
+    try:
+        identity_str = get_jwt_identity()
+        identity = json.loads(identity_str) if isinstance(identity_str, str) else identity_str
+
+        vendor = Vendor.query.filter_by(user_id=identity["id"]).first()
+
+        if not vendor:
+            # Auto-create one if missing
+            data = request.get_json() or {}
+            vendor = Vendor(
+                user_id=identity["id"],
+                name=data.get("name", "My Business"),
+                category=data.get("category", "General"),
+                location=data.get("location"),
+                price=data.get("price", 0),
+                image=data.get("image"),
+                description=data.get("description")
+            )
+            db.session.add(vendor)
+            db.session.commit()
+            return jsonify(vendor.to_dict()), 201
+
+        data = request.get_json()
+
+        vendor.name = data.get("name", vendor.name)
+        vendor.category = data.get("category", vendor.category)
+        vendor.location = data.get("location", vendor.location)
+        vendor.price = data.get("price", vendor.price)
+        vendor.image = data.get("image", vendor.image)
+        vendor.description = data.get("description", vendor.description)
+
+        db.session.commit()
+
+        return jsonify(vendor.to_dict()), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500

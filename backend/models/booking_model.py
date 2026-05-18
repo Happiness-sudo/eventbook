@@ -1,18 +1,21 @@
 from extensions import db
 from datetime import datetime
 
+
 class Booking(db.Model):
     __tablename__ = 'bookings'
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     vendor_id = db.Column(db.Integer, db.ForeignKey('vendors.id'), nullable=False)
-    event_id = db.Column(db.Integer, nullable=True)  # No foreign key to Event
+    event_id = db.Column(db.Integer, nullable=True)
+    event_date = db.Column(db.String(50), nullable=True)
+    message = db.Column(db.Text, nullable=True)
     status = db.Column(db.String(20), default='pending')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    # Relationships - no back_populates to Event
+    # Relationships
     user = db.relationship('User', back_populates='bookings')
     vendor = db.relationship('Vendor', back_populates='bookings')
 
@@ -22,10 +25,13 @@ class Booking(db.Model):
             'user_id': self.user_id,
             'vendor_id': self.vendor_id,
             'event_id': self.event_id,
+            'event_date': self.event_date,
+            'message': self.message,
             'status': self.status,
             'created_at': self.created_at.isoformat() if self.created_at else None,
-            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
         }
+
 
 class Event(db.Model):
     __tablename__ = 'events'
@@ -48,5 +54,5 @@ class Event(db.Model):
             'date': self.date,
             'location': self.location,
             'budget': self.budget,
-            'description': self.description
+            'description': self.description,
         }

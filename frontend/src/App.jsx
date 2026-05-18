@@ -17,7 +17,7 @@ import MyBookings from "./pages/user/MyBookings";
 import MyEvents from "./pages/user/MyEvents";
 import CreateEvent from "./pages/user/CreateEvent";
 import VendorDashboard from "./pages/vendor/VendorDashboard";
-import EditVendorProfile from "./components/EditVendorProfile";
+import EditVendorProfile from "./pages/vendor/EditVendorProfile";
 
 // Simple 404 page
 const NotFound = () => (

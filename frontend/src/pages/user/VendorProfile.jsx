@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
+const API_URL = "http://localhost:5000";
+
 const VendorProfile = () => {
   const { id } = useParams();
   const { user } = useAuth();
@@ -15,8 +17,17 @@ const VendorProfile = () => {
   const [message, setMessage] = useState("");
   const [bookingStatus, setBookingStatus] = useState("");
 
+  // Find the JWT token in localStorage
+  const getToken = () => {
+    const direct = localStorage.getItem("token");
+    if (direct) return direct;
+
+    const userObj = JSON.parse(localStorage.getItem("user") || "{}");
+    return userObj.token || null;
+  };
+
   useEffect(() => {
-    fetch(`http://localhost:5000/api/vendors/${id}`)
+    fetch(`${API_URL}/api/vendors/${id}`)
       .then((r) => {
         if (!r.ok) throw new Error("not found");
         return r.json();
@@ -35,32 +46,43 @@ const VendorProfile = () => {
     e.preventDefault();
     setBookingStatus("");
 
+    const token = getToken();
+
+    if (!token) {
+      setBookingStatus("Please log in to book a vendor.");
+      navigate("/login");
+      return;
+    }
+
     try {
       const booking = {
-        vendorId: vendor.id,
-        userId: user?.id || 1,
-        userName: user?.name || "Guest",
-        eventDate: bookingDate,
+        vendor_id: vendor.id,
+        event_date: bookingDate,
         message,
-        amount: vendor.price || 0,
-        status: "pending",
-        createdAt: new Date().toISOString(),
       };
 
-      const res = await fetch("http://localhost:5000/bookings", {
+      const res = await fetch(`${API_URL}/api/bookings`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify(booking),
       });
 
-      if (!res.ok) throw new Error("Failed");
+      const data = await res.json();
 
-      setBookingStatus(" Booking sent! The vendor will review it.");
+      if (!res.ok) {
+        setBookingStatus(data.error || "Could not send booking. Try again.");
+        return;
+      }
+
+      setBookingStatus("Booking sent! The vendor will review it.");
       setShowForm(false);
       setBookingDate("");
       setMessage("");
     } catch (err) {
-      setBookingStatus("Could not send booking. Try again.");
+      setBookingStatus("Could not reach the server. Try again.");
     }
   };
 
@@ -74,28 +96,33 @@ const VendorProfile = () => {
   if (error)
     return (
       <div style={S.page}>
-        <Link to="/api/vendors" style={S.backBtn}>← Back to Vendors</Link>
+        <Link to="/vendors" style={S.backBtn}>← Back to Vendors</Link>
         <div style={S.error}>{error}</div>
       </div>
     );
 
+  // Backend returns businessName + priceRange from get_vendor_by_id,
+  // but to_dict elsewhere uses name + price — handle both
+  const vendorName = vendor.businessName || vendor.name || "";
+  const vendorPrice = vendor.priceRange ?? vendor.price ?? 0;
+
   return (
     <div style={S.page}>
-      <Link to="/api/vendors" style={S.backBtn}>← Back to Vendors</Link>
+      <Link to="/vendors" style={S.backBtn}>← Back to Vendors</Link>
 
       <div style={S.card}>
         {vendor.image && (
-          <img src={vendor.image} alt={vendor.name} style={S.image} />
+          <img src={vendor.image} alt={vendorName} style={S.image} />
         )}
         <div style={S.body}>
           <div style={S.category}>{vendor.category}</div>
-          <h1 style={S.title}>{vendor.name}</h1>
+          <h1 style={S.title}>{vendorName}</h1>
           <p style={S.location}>📍 {vendor.location || "Kenya"}</p>
 
           <div style={S.metaRow}>
             <span style={S.rating}>⭐ {vendor.rating?.toFixed(1) || "0.0"}</span>
             <span style={S.price}>
-              KES {(vendor.price || 0).toLocaleString()}
+              KES {Number(vendorPrice).toLocaleString()}
             </span>
           </div>
 
@@ -103,17 +130,6 @@ const VendorProfile = () => {
             {vendor.description ||
               "Professional services for your special events."}
           </p>
-
-          {vendor.services && vendor.services.length > 0 && (
-            <>
-              <div style={S.label}>Services Offered</div>
-              <ul style={S.serviceList}>
-                {vendor.services.map((s, i) => (
-                  <li key={i} style={S.serviceItem}>{s}</li>
-                ))}
-              </ul>
-            </>
-          )}
 
           {bookingStatus && <div style={S.statusMsg}>{bookingStatus}</div>}
 
@@ -267,22 +283,6 @@ const S = {
     textTransform: "uppercase",
     letterSpacing: "0.5px",
     marginBottom: "8px",
-  },
-  serviceList: {
-    listStyle: "none",
-    padding: 0,
-    margin: "0 0 24px",
-    display: "flex",
-    flexWrap: "wrap",
-    gap: "8px",
-  },
-  serviceItem: {
-    padding: "6px 14px",
-    borderRadius: "100px",
-    background: "var(--input-bg)",
-    border: "1px solid var(--border)",
-    fontSize: "12px",
-    color: "var(--text)",
   },
   statusMsg: {
     background: "rgba(255,61,154,.1)",

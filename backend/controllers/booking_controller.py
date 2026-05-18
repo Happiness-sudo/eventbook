@@ -9,10 +9,10 @@ import requests
 import json
 
 
+# Send a booking email via EmailJS (silently fails if env vars are missing)
 def send_email(to_email, template_params):
-    """Send email using EmailJS REST API directly"""
     url = "https://api.emailjs.com/api/v1.0/email/send"
-    
+
     payload = {
         'service_id': os.getenv('EMAILJS_SERVICE_ID'),
         'template_id': os.getenv('EMAILJS_TEMPLATE_ID'),
@@ -26,7 +26,7 @@ def send_email(to_email, template_params):
             'message': template_params.get('message', '')
         }
     }
-    
+
     headers = {'Content-Type': 'application/json'}
     try:
         response = requests.post(url, json=payload, headers=headers)
@@ -37,36 +37,34 @@ def send_email(to_email, template_params):
         return False
 
 
+# CREATE BOOKING
 def create_booking():
     identity_str = get_jwt_identity()
     identity = json.loads(identity_str) if isinstance(identity_str, str) else identity_str
     data = request.get_json()
 
     vendor_id = data.get("vendor_id")
+
+    if not vendor_id:
+        return jsonify({"error": "Vendor is required"}), 400
+
     event_id = data.get("event_id")
-
-    if not vendor_id or not event_id:
-        return jsonify({"error": "Vendor and event are required"}), 400
-
-    existing = Booking.query.filter_by(
-        user_id=identity["id"],
-        vendor_id=vendor_id,
-        event_id=event_id
-    ).first()
-
-    if existing:
-        return jsonify({"error": "You already booked this vendor for this event"}), 400
+    event_date = data.get("event_date")
+    message = data.get("message", "")
 
     booking = Booking(
         user_id=identity["id"],
         vendor_id=vendor_id,
         event_id=event_id,
+        event_date=event_date,
+        message=message,
         status="pending"
     )
 
     db.session.add(booking)
     db.session.commit()
-    
+
+    # Notify vendor by email if their account exists
     vendor = Vendor.query.get(vendor_id)
     if vendor and vendor.user_id:
         vendor_user = User.query.get(vendor.user_id)
@@ -76,15 +74,16 @@ def create_booking():
                 to_email=vendor_user.email,
                 template_params={
                     'customer_name': booking_user.name if booking_user else 'Customer',
-                    'booking_date': booking.created_at.isoformat() if booking.created_at else '',
+                    'booking_date': event_date or '',
                     'booking_id': booking.id,
-                    'message': f"New booking request for event ID {event_id}."
+                    'message': message or 'New booking request.'
                 }
             )
-    
+
     return jsonify(booking.to_dict()), 201
 
 
+# GET MY BOOKINGS (as a customer)
 def get_my_bookings():
     identity_str = get_jwt_identity()
     identity = json.loads(identity_str) if isinstance(identity_str, str) else identity_str
@@ -92,6 +91,7 @@ def get_my_bookings():
     return jsonify([b.to_dict() for b in bookings]), 200
 
 
+# GET MY BOOKINGS (as a vendor)
 def get_vendor_bookings():
     identity_str = get_jwt_identity()
     identity = json.loads(identity_str) if isinstance(identity_str, str) else identity_str
@@ -102,6 +102,7 @@ def get_vendor_bookings():
     return jsonify([b.to_dict() for b in bookings]), 200
 
 
+# UPDATE BOOKING STATUS (vendor accepts/rejects)
 def update_booking_status(booking_id):
     identity_str = get_jwt_identity()
     identity = json.loads(identity_str) if isinstance(identity_str, str) else identity_str
@@ -111,7 +112,7 @@ def update_booking_status(booking_id):
     if not booking:
         return jsonify({"error": "Booking not found"}), 404
 
-    if booking.vendor_id != vendor.id:
+    if not vendor or booking.vendor_id != vendor.id:
         return jsonify({"error": "Not allowed"}), 403
 
     data = request.get_json()
@@ -122,22 +123,23 @@ def update_booking_status(booking_id):
 
     booking.status = status
     db.session.commit()
-    
+
     user = User.query.get(booking.user_id)
     if user and user.email:
         send_email(
             to_email=user.email,
             template_params={
                 'customer_name': user.name,
-                'booking_date': booking.created_at.isoformat() if booking.created_at else '',
+                'booking_date': booking.event_date or '',
                 'booking_id': booking.id,
                 'message': f"Your booking #{booking.id} has been {status}."
             }
         )
-    
+
     return jsonify(booking.to_dict()), 200
 
 
+# CREATE EVENT
 def create_event():
     identity_str = get_jwt_identity()
     identity = json.loads(identity_str) if isinstance(identity_str, str) else identity_str
@@ -164,6 +166,7 @@ def create_event():
     return jsonify(event.to_dict()), 201
 
 
+# GET MY EVENTS
 def get_my_events():
     identity_str = get_jwt_identity()
     identity = json.loads(identity_str) if isinstance(identity_str, str) else identity_str
@@ -171,11 +174,13 @@ def get_my_events():
     return jsonify([e.to_dict() for e in events]), 200
 
 
+# ADMIN: GET ALL BOOKINGS
 def get_all_bookings():
     bookings = Booking.query.all()
     return jsonify([b.to_dict() for b in bookings]), 200
 
 
+# ADMIN: GET ALL USERS
 def get_all_users():
     users = User.query.all()
     return jsonify([u.to_dict() for u in users]), 200
