@@ -1,170 +1,174 @@
-# EventBook Frontend
+ EventBook
 
-EventBook is a modern event planning and vendor booking platform built with React and Vite. The platform allows users to create events, browse vendors, make bookings, and manage event-related services through a clean and responsive interface.
+EventBook is a full-stack event planning and vendor booking platform. It connects event organizers with service vendors (caterers, photographers, makeup artists, DJs, and more), enabling end-to-end booking workflows from discovery to confirmation.
 
-## Project Overview
-
-This frontend application focuses on three main user roles:
-
-Users / Event Organizers
-
-   Register and log in
-   Browse vendors
-   View vendor profiles
-   Book services for events
-
-Vendors
-
-  * Create vendor accounts
-  * Manage vendor profiles
-  * Upload portfolio information
-  * Manage booking requests
-
- Tech Stack
-
-* React
-* Vite
-* React Router DOM
-* Context API
-* CSS / Inline Styling
-* LocalStorage (temporary frontend authentication)
-* EmailJS (booking confirmation emails)
-
+Built as a capstone project at Moringa School.
 
 # Features
 
-* User authentication (frontend demo flow)
-* Role-based routing
-* Admin dashboard
-* Vendor dashboard
-* Vendor browsing interface
-* Responsive UI
-* Booking workflow
-* Email notifications using EmailJS
+- JWT-based authentication** with bcrypt password hashing
+- Role-based access control** for customers and vendors
+- Vendor marketplace** with browsing and detailed profile pages
+- Booking workflow** — customers send requests, vendors accept or reject
+- Vendor dashboard** with real-time booking stats and revenue tracking
+- Customer "My Bookings" page** showing status of all bookings
+- Email notifications** via EmailJS when bookings are created or updated
+- Protected routes** that redirect unauthenticated users to login
+- Responsive UI** with a consistent dark-themed design
 
+# Tech Stack
 
+#Frontend
+- React 18 with Vite
+- React Router DOM
+- Context API for auth state
+- Inline styling with CSS variables
 
+# Backend
+- Flask 3 with Flask-SQLAlchemy
+- SQLite (via SQLAlchemy ORM)
+- Flask-JWT-Extended for authentication
+- Flask-CORS for cross-origin requests
+- bcrypt for password hashing
+- python-dotenv for environment variables
 
-# Folder Structure
+## Project Structure
 
-src/
+eventbook/
+├── backend/
+│   ├── app.py
+│   ├── extensions.py
+│   ├── requirements.txt
+│   ├── .env
+│   ├── controllers/
+│   │   ├── auth_controller.py
+│   │   ├── booking_controller.py
+│   │   └── vendor_controller.py
+│   ├── middleware/
+│   │   └── auth_middleware.py
+│   ├── models/
+│   │   ├── user_model.py
+│   │   ├── vendor_model.py
+│   │   └── booking_model.py
+│   ├── routes/
+│   │   ├── auth_routes.py
+│   │   ├── vendor_routes.py
+│   │   └── booking_routes.py
+│   └── instance/
+│       └── eventbook.db
 │
-├── components/
-├── context/
-├── pages/
-│   ├── admin/
-│   ├── auth/
-│   ├── user/
-│   └── vendor/
-├── services/
-├── assets/
-└── App.jsx
+└── frontend/
+    ├── src/
+    │   ├── components/
+    │   │   ├── Navbar.jsx
+    │   │   └── ProtectedRoute.jsx
+    │   ├── context/
+    │   │   ├── AuthContext.jsx
+    │   │   └── ThemeContext.jsx
+    │   ├── pages/
+    │   │   ├── auth/
+    │   │   ├── user/
+    │   │   └── vendor/
+    │   ├── App.jsx
+    │   └── index.css
+    ├── public/
+    └── package.json
 
 
+# Getting Started
 
- Getting Started
+# Prerequisites
 
- 1. Clone the repository
+- Python 3.8+
+- Node.js 18+
+- npm
+
+# Clone the repository
 
 git clone https://github.com/Happiness-sudo/eventbook.git
 
+cd eventbook
 
- 2. Navigate into the project
+# Backend setup
 
-    cd eventbook/frontend
- 
- 4. Install dependencies
-    npm install
-
-5. Start development server
-
-  npm run dev
-
- 
-On a different terminal run
-  
-   npm run server
+cd backend
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
 
 
-Endpoints:
-   
-http://localhost:5000/users
-http://localhost:5000/vendors
-http://localhost:5000/events
-http://localhost:5000/bookings
-http://localhost:5000/services
+Create a `.env` file in the `backend` folder:
 
 
-# Environment Variables
-
-Create a `.env file in the frontend root:
-
-.env
-VITE_EMAILJS_SERVICE_ID=your_service_id
-VITE_EMAILJS_TEMPLATE_ID=your_template_id
-VITE_EMAILJS_PUBLIC_KEY=your_public_key
+JWT_SECRET_KEY=your-secret-key-here
+DATABASE_URL=sqlite:///eventbook.db
+EMAILJS_SERVICE_ID=your_service_id
+EMAILJS_TEMPLATE_ID=your_template_id
+EMAILJS_USER_ID=your_user_id
+EMAILJS_ACCESS_TOKEN=your_access_token
 
 
-# Current Status
+Run the backend:
 
-This project is currently in the frontend development phase.
+flask run
 
-Authentication and data handling are temporarily managed using localStorage until backend integration is completed.
-
-Backend features planned:
-
- Flask API
- Database integration
- JWT authentication
- Real booking system
- Payment integration
+The API will be available at `http://localhost:5000`.
 
 
 
-# Known Limitations
-
-  No backend/database yet
- Authentication is frontend-only for demo purposes
- Some pages still use placeholder/mock data
- Booking functionality is not yet connected to a real API
+#Frontend setup
+In a separate terminal:
 
 
-# Team Collaboration Workflow
-
-Each team member works on a separate feature branch.
-
-Recommended workflow:
-
-git checkout main
-git pull origin main
-git checkout feature/your-branch
-git merge main
+cd frontend
+npm install
+npm run dev
 
 
+The app will be available at `http://localhost:5173`.
 
+# API Endpoints
 
-# Deployment
+# Authentication
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/auth/register` | Register a new user |
+| POST | `/auth/login` | Log in and receive a JWT token |
 
-Frontend deployment will be done using:
+# Vendors
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/vendors` | List all vendors |
+| GET | `/api/vendors/<id>` | Get a specific vendor |
+| GET | `/api/vendors/me` | Get logged-in vendor's profile |
+| PUT | `/api/vendors/me` | Update logged-in vendor's profile |
 
-[Vercel](https://vercel.com/?utm_source=chatgpt.com)
-
-
+# Bookings
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/bookings` | Create a new booking (customer) |
+| GET | `/api/bookings` | Get logged-in user's bookings |
+| GET | `/api/bookings/vendor` | Get bookings for logged-in vendor |
+| PATCH | `/api/bookings/<id>/status` | Accept or reject a booking |
 
 # Future Improvements
 
-* Backend API integration
-* Real-time booking updates
-* Vendor approval system
-* Payment processing
-* Google Maps integration
-* Cloudinary image uploads
+- Payment processing integration (Stripe or M-Pesa)
+- Communication through texts and calls within the app 
+- Vendor rating and review system
+- Cloudinary integration for image uploads
+- Real-time notifications via WebSockets
+- Google Maps integration for vendor locations
+- Admin dashboard for platform moderation
+- Mobile app with React Native
 
+## Authors
 
+- [Happiness-sudo](https://github.com/Happiness-sudo)
+- [sharleenS](https://github.com/sharleenS)
+- [aminSHARIFF](https://github.com/aminSHARIFF)
+- [SolomonKirumba](https://github.com/SolomonKirumba)
 
-# Authors
+## License
 
-Happiness-sudo
-sharleenS
-aminSHARIFF
-SolomonKirumba
+This project is licensed under the MIT License.
