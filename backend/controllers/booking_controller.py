@@ -9,7 +9,7 @@ import requests
 import json
 
 
-# Send a booking email via EmailJS (silently fails if env vars are missing)
+# Send a booking email via EmailJS 
 def send_email(to_email, template_params):
     url = "https://api.emailjs.com/api/v1.0/email/send"
 
@@ -64,7 +64,6 @@ def create_booking():
     db.session.add(booking)
     db.session.commit()
 
-    # Notify vendor by email if their account exists
     vendor = Vendor.query.get(vendor_id)
     if vendor and vendor.user_id:
         vendor_user = User.query.get(vendor.user_id)
@@ -84,22 +83,46 @@ def create_booking():
 
 
 # GET MY BOOKINGS (as a customer)
+# GET MY BOOKINGS (as a customer) — enriched with vendor details
 def get_my_bookings():
     identity_str = get_jwt_identity()
     identity = json.loads(identity_str) if isinstance(identity_str, str) else identity_str
     bookings = Booking.query.filter_by(user_id=identity["id"]).all()
-    return jsonify([b.to_dict() for b in bookings]), 200
+
+    result = []
+    for b in bookings:
+        booking_dict = b.to_dict()
+        vendor = Vendor.query.get(b.vendor_id)
+        booking_dict['vendor_name'] = vendor.name if vendor else 'Unknown'
+        booking_dict['vendor_category'] = vendor.category if vendor else ''
+        booking_dict['vendor_image'] = vendor.image if vendor and vendor.image else 'https://via.placeholder.com/300'
+        booking_dict['amount'] = float(vendor.price) if vendor and vendor.price else 0
+        result.append(booking_dict)
+
+    return jsonify(result), 200
 
 
-# GET MY BOOKINGS (as a vendor)
+# GET MY BOOKINGS (as a vendor) — enriched with customer name + amount
 def get_vendor_bookings():
     identity_str = get_jwt_identity()
     identity = json.loads(identity_str) if isinstance(identity_str, str) else identity_str
+
     vendor = Vendor.query.filter_by(user_id=identity["id"]).first()
     if not vendor:
         return jsonify({"error": "Vendor profile not found"}), 404
+
     bookings = Booking.query.filter_by(vendor_id=vendor.id).all()
-    return jsonify([b.to_dict() for b in bookings]), 200
+
+    result = []
+    for b in bookings:
+        booking_dict = b.to_dict()
+        customer = User.query.get(b.user_id)
+        booking_dict['customer_name'] = customer.name if customer else 'Unknown'
+        booking_dict['customer_email'] = customer.email if customer else ''
+        booking_dict['amount'] = float(vendor.price) if vendor.price else 0
+        result.append(booking_dict)
+
+    return jsonify(result), 200
 
 
 # UPDATE BOOKING STATUS (vendor accepts/rejects)
