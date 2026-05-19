@@ -28,7 +28,7 @@ const PrivateRoute = ({ children, role }) => {
   if (role && user.role !== role) {
     if (user.role === "vendor") return <Navigate to="/vendor/dashboard" replace />;
     if (user.role === "admin")  return <Navigate to="/admin/dashboard"  replace />;
-    return <Navigate to="/api/vendors" replace />;
+    return <Navigate to="/vendors" replace />;
   }
 
   return children;

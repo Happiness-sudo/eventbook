@@ -7,7 +7,7 @@ function VendorCard({ vendor, onView }) {
     location = "Location not set",
     price = 0,
     rating = 0,
-    image,
+    image_url,
   } = vendor;
 
   const formattedPrice = Number(price).toLocaleString();
@@ -15,7 +15,7 @@ function VendorCard({ vendor, onView }) {
   return (
     <div style={S.card} onClick={() => onView && onView(vendor)}>
       <img
-        src={image || "https://via.placeholder.com/260x150?text=No+Image"}
+        src={image_url || "https://via.placeholder.com/260x150?text=No+Image"}
         alt={name}
         style={S.image}
       />
