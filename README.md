@@ -2,19 +2,18 @@
 
 EventBook is a full-stack event planning and vendor booking platform. It connects event organizers with service vendors (caterers, photographers, makeup artists, DJs, and more), enabling end-to-end booking workflows from discovery to confirmation.
 
-Built as a capstone project at Moringa School.
 
 # Features
 
-- JWT-based authentication** with bcrypt password hashing
-- Role-based access control** for customers and vendors
-- Vendor marketplace** with browsing and detailed profile pages
-- Booking workflow** — customers send requests, vendors accept or reject
-- Vendor dashboard** with real-time booking stats and revenue tracking
-- Customer "My Bookings" page** showing status of all bookings
-- Email notifications** via EmailJS when bookings are created or updated
-- Protected routes** that redirect unauthenticated users to login
-- Responsive UI** with a consistent dark-themed design
+- JWT-based authentication with bcrypt password hashing
+- Role-based access control for customers and vendors
+- Vendor marketplace with browsing and detailed profile pages
+- Booking workflow customers send requests, vendors accept or reject
+- Vendor dashboard with real-time booking stats and revenue tracking
+- Customer "My Bookings" page showing status of all bookings
+- Email notifications via EmailJS when bookings are created or updated
+- Protected routes that redirect unauthenticated users to login
+- Responsive UI with a consistent dark-themed design
 
 # Tech Stack
 
