@@ -18,8 +18,8 @@ import MyEvents from "./pages/user/MyEvents";
 import CreateEvent from "./pages/user/CreateEvent";
 import VendorDashboard from "./pages/vendor/VendorDashboard";
 import EditVendorProfile from "./pages/vendor/EditVendorProfile";
+import VendorBookings from "./pages/vendor/VendorBookings";
 
-// Simple 404 page
 const NotFound = () => (
   <div style={{ textAlign: "center", padding: "50px" }}>
     <h2>Page Not Found</h2>
@@ -45,7 +45,7 @@ function App() {
             <Route path="/create-event" element={<CreateEvent />} />
             <Route path="/vendor/dashboard" element={<VendorDashboard />} />
             <Route path="/vendor/profile/edit" element={<EditVendorProfile />} />
-            {/* 404 catch-all */}
+            <Route path="/vendor/bookings" element={<VendorBookings />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
