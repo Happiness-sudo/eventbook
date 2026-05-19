@@ -161,7 +161,7 @@ const S = {
   subtitle: { fontSize: "14px", color: "var(--muted)", marginBottom: "24px" },
   filterRow: { display: "flex", gap: "10px", marginBottom: "24px", flexWrap: "wrap" },
   filterBtn: { padding: "8px 16px", borderRadius: "100px", border: "1px solid var(--border)", background: "var(--card-bg)", color: "var(--muted)", fontWeight: 600, fontSize: "13px", cursor: "pointer" },
-  filterBtnActive: { background: "linear-gradient(135deg,#FF3D9A,#FF6B35)", color: "#fff", border: "none" },
+  filterBtnActive: { background: "linear-gradient(135deg,#3b82f6,#FF6B35)", color: "#fff", border: "none" },
   empty: { background: "var(--card-bg)", border: "1px solid var(--border)", borderRadius: "16px", padding: "40px", textAlign: "center", color: "var(--muted)", fontSize: "14px" },
   bookingList: { display: "flex", flexDirection: "column", gap: "12px" },
   bookingCard: { background: "var(--card-bg)", border: "1px solid var(--border)", borderRadius: "16px", padding: "20px" },
@@ -174,7 +174,7 @@ const S = {
   badgeAccepted: { background: "rgba(76,175,80,0.15)", color: "#4CAF50" },
   badgeRejected: { background: "rgba(244,67,54,0.15)", color: "#F44336" },
   bookingActions: { display: "flex", gap: "10px", justifyContent: "flex-end", marginTop: "12px" },
-  approveBtn: { padding: "10px 20px", borderRadius: "100px", border: "none", background: "linear-gradient(135deg,#FF3D9A,#FF6B35)", color: "#fff", fontWeight: 700, fontSize: "13px", cursor: "pointer" },
+  approveBtn: { padding: "10px 20px", borderRadius: "100px", border: "none", background: "linear-gradient(135deg,#3b82f6,#FF6B35)", color: "#fff", fontWeight: 700, fontSize: "13px", cursor: "pointer" },
   rejectBtn: { padding: "10px 20px", borderRadius: "100px", border: "1px solid var(--border)", background: "transparent", color: "var(--text)", fontWeight: 600, fontSize: "13px", cursor: "pointer" },
 };
 

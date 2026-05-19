@@ -56,7 +56,7 @@ const S = {
   category: {
     fontSize: "11px",
     fontWeight: 700,
-    color: "#FF3D9A",
+    color: "#3b82f6",
     textTransform: "uppercase",
     letterSpacing: "0.5px",
   },
@@ -88,7 +88,7 @@ const S = {
   price: {
     fontSize: "15px",
     fontWeight: 800,
-    background: "linear-gradient(135deg,#FF3D9A,#FF6B35)",
+    background: "linear-gradient(135deg,#3b82f6,#FF6B35)",
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent",
   },

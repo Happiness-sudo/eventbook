@@ -11,7 +11,7 @@ function StatusBadge({ status }) {
       border: "rgba(6,214,160,.3)",
     },
     cancelled: {
-      text: "#FF3D9A",
+      text: "#3b82f6",
       bg: "rgba(255,61,154,.12)",
       border: "rgba(255,61,154,.3)",
     },

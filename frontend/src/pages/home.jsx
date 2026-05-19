@@ -9,7 +9,7 @@ export default function Home() {
 
       {/* Blobs */}
       <div style={{...S.blob, width:350, height:350, background:"#4361EE", top:-80, right:-80}} />
-      <div style={{...S.blob, width:250, height:250, background:"#FF3D9A", bottom:-60, left:-40}} />
+      <div style={{...S.blob, width:250, height:250, background:"#3b82f6", bottom:-60, left:-40}} />
       <div style={{...S.blob, width:200, height:200, background:"#06D6A0", top:"40%", left:"30%"}} />
 
       {/* Theme toggle */}
@@ -99,7 +99,7 @@ const S = {
     fontFamily: "var(--font-head)",
     fontSize: "16px",
     fontWeight: 800,
-    background: "linear-gradient(135deg,#FF3D9A,#FF6B35)",
+    background: "linear-gradient(135deg,#3b82f6,#FF6B35)",
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent",
     marginBottom: "12px",
@@ -136,7 +136,7 @@ const S = {
   },
   register: {
     padding: "11px 28px",
-    background: "linear-gradient(135deg,#FF3D9A,#FF6B35)",
+    background: "linear-gradient(135deg,#3b82f6,#FF6B35)",
     borderRadius: "100px",
     color: "#fff",
     textDecoration: "none",

@@ -15,7 +15,9 @@ function Navbar() {
       <Link to="/" style={S.brand}>EventBook</Link>
 
       <div style={S.links}>
-        <Link to="/vendors" style={S.link}>Browse Vendors</Link>
+        {user && (
+          <Link to="/vendors" style={S.link}>Browse Vendors</Link>
+        )}
 
         {user?.role === "user" && (
           <>
@@ -52,70 +54,14 @@ function Navbar() {
 }
 
 const S = {
-  nav: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "16px 32px",
-    background: "var(--card-bg)",
-    borderBottom: "1px solid var(--border)",
-    fontFamily: "system-ui, sans-serif",
-  },
-  brand: {
-    fontFamily: "var(--font-head)",
-    fontSize: "20px",
-    fontWeight: 800,
-    background: "linear-gradient(135deg,#FF3D9A,#FF6B35)",
-    WebkitBackgroundClip: "text",
-    WebkitTextFillColor: "transparent",
-    textDecoration: "none",
-  },
-  links: {
-    display: "flex",
-    gap: "24px",
-    alignItems: "center",
-  },
-  link: {
-    color: "var(--text)",
-    textDecoration: "none",
-    fontSize: "14px",
-    fontWeight: 600,
-  },
-  right: {
-    display: "flex",
-    gap: "12px",
-    alignItems: "center",
-  },
-  linkBtn: {
-    padding: "8px 16px",
-    borderRadius: "100px",
-    border: "1px solid var(--border)",
-    background: "transparent",
-    color: "var(--text)",
-    fontSize: "13px",
-    fontWeight: 600,
-    cursor: "pointer",
-    fontFamily: "inherit",
-    textDecoration: "none",
-    display: "inline-block",
-  },
-  primaryBtn: {
-    padding: "8px 18px",
-    borderRadius: "100px",
-    border: "none",
-    background: "linear-gradient(135deg,#FF3D9A,#FF6B35)",
-    color: "#fff",
-    fontSize: "13px",
-    fontWeight: 700,
-    cursor: "pointer",
-    textDecoration: "none",
-    display: "inline-block",
-  },
-  greeting: {
-    fontSize: "13px",
-    color: "var(--muted)",
-    fontWeight: 600,
-  },
+  nav: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 32px", background: "var(--card-bg)", borderBottom: "1px solid var(--border)", fontFamily: "system-ui, sans-serif" },
+  brand: { fontFamily: "var(--font-head)", fontSize: "20px", fontWeight: 800, background: "linear-gradient(135deg,#3b82f6,#FF6B35)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", textDecoration: "none" },
+  links: { display: "flex", gap: "24px", alignItems: "center" },
+  link: { color: "var(--text)", textDecoration: "none", fontSize: "14px", fontWeight: 600 },
+  right: { display: "flex", gap: "12px", alignItems: "center" },
+  linkBtn: { padding: "8px 16px", borderRadius: "100px", border: "1px solid var(--border)", background: "transparent", color: "var(--text)", fontSize: "13px", fontWeight: 600, cursor: "pointer", fontFamily: "inherit", textDecoration: "none", display: "inline-block" },
+  primaryBtn: { padding: "8px 18px", borderRadius: "100px", border: "none", background: "linear-gradient(135deg,#3b82f6,#FF6B35)", color: "#fff", fontSize: "13px", fontWeight: 700, cursor: "pointer", textDecoration: "none", display: "inline-block" },
+  greeting: { fontSize: "13px", color: "var(--muted)", fontWeight: 600 },
 };
 
 export default Navbar;

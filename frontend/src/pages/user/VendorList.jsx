@@ -125,7 +125,7 @@ const S = {
   },
   error: {
     fontSize: "13px",
-    color: "#FF3D9A",
+    color: "#3b82f6",
     background: "rgba(255,61,154,.1)",
     border: "1px solid rgba(255,61,154,.3)",
     padding: "12px 16px",

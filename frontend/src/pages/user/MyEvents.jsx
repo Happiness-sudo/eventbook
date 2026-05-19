@@ -137,7 +137,7 @@ const S = {
     padding: "10px 20px",
     borderRadius: "100px",
     border: "none",
-    background: "linear-gradient(135deg,#FF3D9A,#FF6B35)",
+    background: "linear-gradient(135deg,#3b82f6,#FF6B35)",
     color: "#fff",
     fontSize: "14px",
     fontWeight: 700,
@@ -224,7 +224,7 @@ const S = {
   },
   error: {
     fontSize: "13px",
-    color: "#FF3D9A",
+    color: "#3b82f6",
     background: "rgba(255,61,154,.1)",
     border: "1px solid rgba(255,61,154,.3)",
     padding: "12px 16px",

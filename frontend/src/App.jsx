@@ -6,6 +6,7 @@ import { ThemeProvider } from "./context/ThemeContext";
 
 /* Components */
 import Navbar from "./components/Navbar";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 /* Pages */
 import Home from "./pages/home";
@@ -24,7 +25,7 @@ const NotFound = () => (
   <div style={{ textAlign: "center", padding: "50px" }}>
     <h2>Page Not Found</h2>
     <p>The page you're looking for doesn't exist.</p>
-    <a href="/vendors">Go to Vendors</a>
+    <a href="/">Go Home</a>
   </div>
 );
 
@@ -35,17 +36,41 @@ function App() {
         <BrowserRouter>
           <Navbar />
           <Routes>
+            {/* Public routes */}
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/vendors" element={<VendorMarketplace />} />
-            <Route path="/vendors/:id" element={<VendorProfile />} />
-            <Route path="/my-bookings" element={<MyBookings />} />
-            <Route path="/my-events" element={<MyEvents />} />
-            <Route path="/create-event" element={<CreateEvent />} />
-            <Route path="/vendor/dashboard" element={<VendorDashboard />} />
-            <Route path="/vendor/profile/edit" element={<EditVendorProfile />} />
-            <Route path="/vendor/bookings" element={<VendorBookings />} />
+
+            {/* Login required for everyone */}
+            <Route path="/vendors" element={
+              <ProtectedRoute><VendorMarketplace /></ProtectedRoute>
+            } />
+            <Route path="/vendors/:id" element={
+              <ProtectedRoute><VendorProfile /></ProtectedRoute>
+            } />
+
+            {/* Customer-only routes */}
+            <Route path="/my-bookings" element={
+              <ProtectedRoute role="user"><MyBookings /></ProtectedRoute>
+            } />
+            <Route path="/my-events" element={
+              <ProtectedRoute role="user"><MyEvents /></ProtectedRoute>
+            } />
+            <Route path="/create-event" element={
+              <ProtectedRoute role="user"><CreateEvent /></ProtectedRoute>
+            } />
+
+            {/* Vendor-only routes */}
+            <Route path="/vendor/dashboard" element={
+              <ProtectedRoute role="vendor"><VendorDashboard /></ProtectedRoute>
+            } />
+            <Route path="/vendor/profile/edit" element={
+              <ProtectedRoute role="vendor"><EditVendorProfile /></ProtectedRoute>
+            } />
+            <Route path="/vendor/bookings" element={
+              <ProtectedRoute role="vendor"><VendorBookings /></ProtectedRoute>
+            } />
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

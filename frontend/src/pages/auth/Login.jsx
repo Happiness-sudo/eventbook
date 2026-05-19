@@ -1,3 +1,5 @@
+// Login.jsx
+
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
@@ -40,6 +42,7 @@ function Login() {
     } catch (err) {
       setError("Server error. Make sure backend is running.");
     }
+
     setLoading(false);
   };
 
@@ -48,9 +51,13 @@ function Login() {
       <div style={styles.overlay}>
         <div style={styles.card}>
           <h1 style={styles.logo}>EventBook</h1>
+
           <h2 style={styles.title}>Welcome Back</h2>
+
           <p style={styles.subtitle}>Login to continue</p>
+
           {error && <div style={styles.error}>{error}</div>}
+
           <form onSubmit={handleSubmit}>
             <input
               type="email"
@@ -60,6 +67,7 @@ function Login() {
               style={styles.input}
               required
             />
+
             <input
               type="password"
               placeholder="Password"
@@ -68,12 +76,21 @@ function Login() {
               style={styles.input}
               required
             />
-            <button type="submit" style={styles.button} disabled={loading}>
+
+            <button
+              type="submit"
+              style={styles.button}
+              disabled={loading}
+            >
               {loading ? "Logging in..." : "Login"}
             </button>
           </form>
+
           <p style={styles.footer}>
-            Don't have an account? <Link to="/register" style={styles.link}>Register</Link>
+            Don't have an account?{" "}
+            <Link to="/register" style={styles.link}>
+              Register
+            </Link>
           </p>
         </div>
       </div>
@@ -88,6 +105,7 @@ const styles = {
     backgroundSize: "cover",
     backgroundPosition: "center",
   },
+
   overlay: {
     minHeight: "100vh",
     display: "flex",
@@ -96,6 +114,7 @@ const styles = {
     backgroundColor: "rgba(0,0,0,0.7)",
     padding: "20px",
   },
+
   card: {
     width: "100%",
     maxWidth: "420px",
@@ -104,9 +123,28 @@ const styles = {
     borderRadius: "20px",
     border: "1px solid rgba(255,255,255,0.1)",
   },
-  logo: { color: "#ff2e88", marginBottom: "10px", fontSize: "40px", fontWeight: "bold", textAlign: "center" },
-  title: { fontSize: "28px", marginBottom: "10px", color: "white", textAlign: "center" },
-  subtitle: { color: "#b4b4c7", marginBottom: "25px", textAlign: "center" },
+
+  logo: {
+    color: "#2563eb",
+    marginBottom: "10px",
+    fontSize: "40px",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+
+  title: {
+    fontSize: "28px",
+    marginBottom: "10px",
+    color: "white",
+    textAlign: "center",
+  },
+
+  subtitle: {
+    color: "#b4b4c7",
+    marginBottom: "25px",
+    textAlign: "center",
+  },
+
   input: {
     width: "100%",
     padding: "14px",
@@ -117,19 +155,30 @@ const styles = {
     color: "white",
     fontSize: "15px",
   },
+
   button: {
     width: "100%",
     padding: "14px",
     border: "none",
     borderRadius: "10px",
-    background: "#ff2e88",
+    background: "#2563eb",
     color: "white",
     fontSize: "16px",
     cursor: "pointer",
     fontWeight: "bold",
   },
-  footer: { marginTop: "20px", textAlign: "center", color: "#b4b4c7" },
-  link: { color: "#ff2e88", textDecoration: "none" },
+
+  footer: {
+    marginTop: "20px",
+    textAlign: "center",
+    color: "#b4b4c7",
+  },
+
+  link: {
+    color: "#2563eb",
+    textDecoration: "none",
+  },
+
   error: {
     background: "rgba(255,0,0,0.2)",
     color: "#ff8080",
