@@ -44,14 +44,14 @@ const CreateEvent = () => {
     <div style={S.page}>
       <div style={S.card}>
         <div style={S.logo}>EventBook</div>
-        <h1 style={S.title}>Create Event 🎯</h1>
+        <h1 style={S.title}>Create Event </h1>
         <p style={S.sub}>Tell us about your event so we can help you find vendors</p>
 
         {error && <div style={S.error}>{error}</div>}
 
         <form onSubmit={handleSubmit}>
           {[
-            { name: "title", label: "Event Title", type: "text", ph: "Sarah's Wedding" },
+            { name: "title", label: "Event Title", type: "text", ph: "Wedding" },
             { name: "date", label: "Event Date", type: "date", ph: "" },
             { name: "location", label: "Location", type: "text", ph: "Nairobi" },
             { name: "budget", label: "Budget (KES)", type: "number", ph: "50000" },

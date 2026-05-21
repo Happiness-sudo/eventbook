@@ -12,8 +12,9 @@ export const ThemeProvider = ({ children }) => {
     localStorage.setItem("eb-theme", theme);
   }, [theme]);
 
-  const toggleTheme = () =>
+  const toggleTheme = () => {
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+  };
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>

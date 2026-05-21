@@ -12,10 +12,13 @@ export default function Home() {
       <div style={{...S.blob, width:250, height:250, background:"#3b82f6", bottom:-60, left:-40}} />
       <div style={{...S.blob, width:200, height:200, background:"#06D6A0", top:"40%", left:"30%"}} />
 
-      {/* Theme toggle */}
-      <button onClick={toggleTheme} style={S.themeBtn}>
-        {theme === "dark" ? "☀️" : "🌙"}
-      </button>
+      <div style={S.topBar}>
+        <div style={S.topLogo}>EventBook</div>
+
+        <button onClick={toggleTheme} style={S.themeBtn}>
+          {theme === "dark" ? "Light" : "Dark"}
+        </button>
+      </div>
 
       <div style={S.card}>
         <div style={S.logo}>EventBook</div>
@@ -33,9 +36,7 @@ export default function Home() {
         {/* Stats strip */}
         <div style={S.stats}>
           {[
-            { n:"200+", l:"Vendors"  },
-            { n:"1.2K", l:"Events"   },
-            { n:"98%",  l:"Satisfied"},
+            
           ].map((st) => (
             <div key={st.l} style={S.statItem}>
               <div style={S.statNum}>{st.n}</div>
@@ -67,21 +68,36 @@ const S = {
     opacity: .15,
     pointerEvents: "none",
   },
-  themeBtn: {
-    position: "fixed",
+  topBar: {
+    position: "absolute",
     top: "20px",
-    right: "20px",
-    fontSize: "18px",
-    background: "var(--card-bg)",
-    border: "1px solid var(--border)",
-    borderRadius: "12px",
-    width: "40px",
-    height: "40px",
-    cursor: "pointer",
+    left: "0",
+    width: "100%",
+    padding: "0 40px",
     display: "flex",
+    justifyContent: "space-between",
     alignItems: "center",
-    justifyContent: "center",
     zIndex: 10,
+  },
+
+  topLogo: {
+    fontFamily: "var(--font-head)",
+    fontSize: "22px",
+    fontWeight: 800,
+    background: "linear-gradient(135deg,#3b82f6,#FF6B35)",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+  },
+  themeBtn: {
+    padding: "10px 18px",
+    borderRadius: "100px",
+    border: "1px solid var(--border)",
+    background: "var(--card-bg)",
+    color: "var(--text)",
+    fontSize: "13px",
+    fontWeight: 700,
+    cursor: "pointer",
+    backdropFilter: "blur(12px)",
   },
   card: {
     position: "relative",

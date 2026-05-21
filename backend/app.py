@@ -1,7 +1,7 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
-from extensions import db, jwt
+from extensions import db, jwt, migrate
 from routes.auth_routes import auth_bp
 from routes.booking_routes import bookings_bp
 from routes.vendor_routes import vendor_bp
@@ -31,6 +31,7 @@ app.config["JWT_SECRET_KEY"] = os.getenv(
 # Init extensions
 db.init_app(app)
 jwt.init_app(app)
+migrate.init_app(app, db)
 
 # Allow the frontend to talk to the API
 CORS(
@@ -54,12 +55,6 @@ def home():
         "message": "EventBook API running",
         "status": "ok"
     }), 200
-
-
-# Create tables on first run
-with app.app_context():
-    db.create_all()
-
 
 if __name__ == "__main__":
     app.run(debug=True)
