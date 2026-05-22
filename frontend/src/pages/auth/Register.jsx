@@ -22,7 +22,7 @@ function Register() {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/auth/register",
+        "https://eventbook-08sq.onrender.com/auth/register",
         {
           method: "POST",
           headers: {

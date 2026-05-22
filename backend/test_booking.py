@@ -2,7 +2,7 @@
 import requests
 import json
 
-BASE = "http://localhost:5000"
+BASE = "https://eventbook-08sq.onrender.com"
 GREEN = "\033[92m"
 RED = "\033[91m"
 YELLOW = "\033[93m"

@@ -8,7 +8,7 @@ function VendorMarketplace() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/vendors')
+    fetch('https://eventbook-08sq.onrender.com/api/vendors')
       .then((res) => {
         if (!res.ok) {
           throw new Error('Network response was not ok');

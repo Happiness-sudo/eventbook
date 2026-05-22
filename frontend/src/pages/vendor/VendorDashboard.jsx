@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://eventbook-08sq.onrender.com";
 
 const VendorDashboard = () => {
   const { user } = useAuth();
