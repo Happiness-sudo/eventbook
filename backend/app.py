@@ -34,13 +34,11 @@ jwt.init_app(app)
 migrate.init_app(app, db)
 
 # Allow the frontend to talk to the API
-CORS(
-    app,
-    resources={r"/*": {"origins": [
-        "http://localhost:5173",
-        "http://127.0.0.1:5173"
-    ]}}
-)
+CORS(app, resources={r"/*": {"origins": [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://eventbook-ten.vercel.app"
+]}})
 
 # Register blueprints
 app.register_blueprint(auth_bp, url_prefix="/auth")
